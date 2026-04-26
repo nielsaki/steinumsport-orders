@@ -1,0 +1,19 @@
+.ssc-status {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	background: #e3e6ea;
+	color: #2c3e50;
+}
+
+.ssc-status--received   { background: #fff3cd; color: #856404; }
+.ssc-status--processing { background: #d1ecf1; color: #0c5460; }
+.ssc-status--delivered  { background: #d4edda; color: #155724; }
+.ssc-status--cancelled  { background: #f8d7da; color: #721c24; }
+
+.ssc-detail-grid pre {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 13px;
+}

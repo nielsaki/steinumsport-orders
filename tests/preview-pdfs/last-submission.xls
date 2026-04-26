@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
+<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Title>Order</Title></DocumentProperties>
+<Styles>
+ <Style ss:ID="Default" ss:Name="Normal"><Font ss:FontName="Arial" ss:Size="11" ss:Bold="1"/><Alignment ss:Vertical="Center"/></Style>
+ <Style ss:ID="GrayBlack"><Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#BFBFBF" ss:Pattern="Solid"/>
+  <Borders><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBBBBB"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBBBBB"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBBBBB"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BBBBBB"/>
+  </Borders></Style>
+ <Style ss:ID="RedPlain"><Font ss:FontName="Arial" ss:Size="11" ss:Bold="1" ss:Color="#FF0000"/></Style>
+</Styles>
+<Worksheet ss:Name="Bílleggingar">
+<Table ss:DefaultColumnWidth="65" ss:DefaultRowHeight="15">
+ <Column ss:Index="1" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="3" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="5" ss:AutoFitWidth="0" ss:Width="95"/>
+ <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="7" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="8" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="9" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="10" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="11" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="12" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="13" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="14" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="15" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="16" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="17" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="18" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="19" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="20" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="21" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="22" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="23" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="24" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="25" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="26" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="27" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="28" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="29" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="30" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="31" ss:AutoFitWidth="0" ss:Width="65"/>
+ <Column ss:Index="32" ss:AutoFitWidth="0" ss:Width="65"/>
+<Row ss:Height="18">
+ <Cell ss:Index="5" ss:StyleID="GrayBlack"><Data ss:Type="String">Name of club</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Havnar Róðrarfelag</Data></Cell>
+</Row>
+<Row ss:Height="18">
+ <Cell ss:Index="5" ss:StyleID="GrayBlack"><Data ss:Type="String">Name of boat</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Havnarbáturin</Data></Cell>
+</Row>
+<Row ss:Height="8">
+</Row>
+<Row ss:Height="20">
+ <Cell ss:Index="4" ss:StyleID="GrayBlack"><Data ss:Type="String">QTY</Data></Cell>
+ <Cell ss:Index="5" ss:StyleID="GrayBlack"><Data ss:Type="String">PRODUCT</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="GrayBlack"><Data ss:Type="String">Size</Data></Cell>
+ <Cell ss:Index="7" ss:StyleID="GrayBlack"><Data ss:Type="String">NOTES</Data></Cell>
+ <Cell ss:Index="8" ss:StyleID="GrayBlack"><Data ss:Type="String">ANYNAME</Data></Cell>
+</Row>
+<Row ss:Height="16">
+ <Cell ss:Index="4" ss:StyleID="RedPlain"><Data ss:Type="String">2</Data></Cell>
+ <Cell ss:Index="5" ss:StyleID="RedPlain"><Data ss:Type="String">Profit Tshirt</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">XL</Data></Cell>
+ <Cell ss:Index="7" ss:StyleID="RedPlain"><Data ss:Type="String"></Data></Cell>
+ <Cell ss:Index="8" ss:StyleID="RedPlain"><Data ss:Type="String"></Data></Cell>
+</Row>
+</Table></Worksheet></Workbook>

@@ -1,0 +1,392 @@
+/* Steinum Sport Clothes – order form */
+
+.ssc-form {
+	--ssc-surface: #fff;
+	--ssc-bg: #f1f5f9;
+	--ssc-line: #e2e8f0;
+	--ssc-text: #0f172a;
+	--ssc-text-muted: #64748b;
+	--ssc-accent: #1e3a5f;
+	--ssc-accent-mid: #2d4a7a;
+	--ssc-focus: #3b5f8f;
+	--ssc-error: #b91c1c;
+	--ssc-radius: 10px;
+	--ssc-radius-sm: 8px;
+	--ssc-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+	--ssc-shadow-in: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+	--ssc-line-control-h: 2.7rem;
+	max-width: min(100%, 60rem);
+	margin: 0 auto;
+	padding: 1.5rem 1.25rem 1.75rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	color: var(--ssc-text);
+	font: 100%/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	background: var(--ssc-surface);
+	border-radius: var(--ssc-radius);
+	box-shadow: 0 4px 24px rgba(15, 23, 42, 0.07);
+	border: 1px solid var(--ssc-line);
+}
+
+@media (min-width: 40rem) {
+	.ssc-form {
+		padding: 1.75rem 2rem 2rem;
+	}
+}
+
+.ssc-form__section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin: 0 0 1.35rem;
+}
+
+.ssc-form__section:first-of-type {
+	margin-top: 0;
+}
+
+.ssc-form__section--contact {
+	margin-top: 0.25rem;
+}
+
+.ssc-form__section-title {
+	margin: 0 0 0.25rem;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssc-text-muted);
+}
+
+.ssc-form .ssc-field {
+	margin: 0;
+	display: grid;
+	gap: 0.35rem;
+}
+
+.ssc-form label {
+	font-weight: 600;
+	font-size: 0.9rem;
+	color: #334155;
+	letter-spacing: 0.01em;
+}
+
+.ssc-form input[type="text"],
+.ssc-form input[type="email"],
+.ssc-form input[type="tel"],
+.ssc-form input[type="number"],
+.ssc-form textarea,
+.ssc-form select {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.62rem 0.8rem;
+	border: 1px solid var(--ssc-line);
+	border-radius: var(--ssc-radius-sm);
+	font: inherit;
+	background: #fafbfc;
+	color: var(--ssc-text);
+	box-shadow: var(--ssc-shadow-in);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.ssc-form input::placeholder,
+.ssc-form select::placeholder,
+.ssc-form textarea::placeholder {
+	color: #94a3b8;
+}
+
+.ssc-form input:hover,
+.ssc-form select:hover,
+.ssc-form textarea:hover {
+	background: #fff;
+	border-color: #cbd5e1;
+}
+
+.ssc-form input:focus,
+.ssc-form select:focus,
+.ssc-form textarea:focus {
+	outline: none;
+	background: #fff;
+	border-color: var(--ssc-focus);
+	box-shadow: var(--ssc-shadow-in), 0 0 0 3px rgba(59, 95, 143, 0.2);
+}
+
+.ssc-form .ssc-field--error input,
+.ssc-form .ssc-field--error select,
+.ssc-form .ssc-field--error textarea {
+	border-color: var(--ssc-error);
+	background: #fef2f2;
+}
+
+.ssc-form .ssc-field--error input:focus,
+.ssc-form .ssc-field--error select:focus,
+.ssc-form .ssc-field--error textarea:focus {
+	box-shadow: var(--ssc-shadow-in), 0 0 0 3px rgba(185, 28, 28, 0.2);
+}
+
+.ssc-form fieldset.ssc-lines {
+	margin: 0 0 1.35rem;
+	padding: 1.25rem 1.4rem 1.35rem;
+	border: 1px solid var(--ssc-line);
+	border-radius: var(--ssc-radius);
+	background: var(--ssc-bg);
+}
+
+.ssc-form fieldset.ssc-lines legend {
+	margin: 0 0 0.1rem;
+	font-weight: 700;
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssc-accent);
+}
+
+.ssc-form fieldset .description {
+	margin: 0.45rem 0 0.85rem;
+	color: var(--ssc-text-muted);
+	font-size: 0.9rem;
+	line-height: 1.45;
+}
+
+/* Order lines: card stack */
+.ssc-line-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 1.1rem;
+}
+
+.ssc-line-row {
+	position: relative;
+	background: var(--ssc-surface);
+	border: 1px solid var(--ssc-line);
+	border-radius: 10px;
+	padding: 1.1rem 1.2rem 1.15rem;
+	box-shadow: var(--ssc-shadow);
+}
+
+/* “Window” close: top-left of each line card */
+.ssc-form .ssc-line-close {
+	position: absolute;
+	top: 0.45rem;
+	left: 0.45rem;
+	z-index: 2;
+	box-sizing: border-box;
+	width: 1.35rem;
+	height: 1.35rem;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #e11d48;
+	border-radius: 4px;
+	background: #fff;
+	color: #e11d48;
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 600;
+	line-height: 1;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: var(--ssc-shadow-in);
+	transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.ssc-form .ssc-line-close:hover {
+	color: #b91c1c;
+	background: #fff5f5;
+	border-color: #b91c1c;
+}
+
+.ssc-form .ssc-line-close:focus-visible {
+	outline: 2px solid #e11d48;
+	outline-offset: 2px;
+}
+
+/* Line parts toggled in JS; class avoids [hidden] + !important fighting the browser. */
+.ssc-line-row > .is-ssc-hidden,
+.ssc-line-grid .is-ssc-hidden {
+	display: none !important;
+}
+
+/* Reserve horizontal space for the top-left close so “Slag” and fields don’t sit under the ×. */
+.ssc-line-grid {
+	display: grid;
+	/* 0.45 (offset) + 1.35 (button) + 0.5 (gap) ≈ 2.3rem; extra for long labels. */
+	padding-left: 2.45rem;
+	box-sizing: border-box;
+	grid-template-columns:
+		minmax(8rem, 1.2fr) minmax(5.5rem, 1fr) minmax(4.5rem, 0.9fr) minmax(5.5rem, 1fr) minmax(3.5rem, 0.7fr) minmax(6.5rem, 1.2fr);
+	gap: 0.7rem 1.05rem;
+	align-items: end;
+}
+
+@media (min-width: 78rem) {
+	.ssc-line-grid {
+		gap: 0.75rem 1.2rem;
+	}
+}
+
+/* Below this width the fields stack */
+@media (max-width: 1200px) {
+	.ssc-line-grid {
+		grid-template-columns: 1fr 1fr;
+		gap: 0.85rem 0.95rem;
+	}
+	.ssc-line-field--name,
+	.ssc-sub-trikot-gender,
+	.ssc-sub-speed {
+		grid-column: 1 / -1;
+	}
+}
+
+.ssc-form .ssc-line-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	min-width: 0;
+}
+
+.ssc-form .ssc-line-field label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #475569;
+	line-height: 1.2;
+	letter-spacing: 0.01em;
+}
+
+/* One visual system for all line inputs (alike, smooth) */
+.ssc-form .ssc-line-field select,
+.ssc-form .ssc-line-field input[type="text"],
+.ssc-form .ssc-line-field input[type="number"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	min-height: var(--ssc-line-control-h, 2.7rem);
+	box-sizing: border-box;
+	padding: 0.65rem 0.8rem;
+	border: 1px solid var(--ssc-line);
+	border-radius: 8px;
+	background: #fff;
+	color: var(--ssc-text);
+	font: inherit;
+	font-size: 0.95rem;
+	line-height: 1.3;
+	box-shadow: var(--ssc-shadow-in);
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.ssc-form .ssc-line-field select {
+	background-color: #fff;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23475569' d='M1.4 0L6 4.3 10.6 0 12 1.3 6.2 6.4c-.1.1-.2.1-.2.1-.1.1-.2.1-.2.1s-.1 0-.2-.1c-.1 0-.2-.1-.2-.1L0 1.3z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.65rem center;
+	background-size: 0.65rem;
+	padding-right: 2.1rem;
+}
+
+.ssc-form .ssc-line-field select:hover,
+.ssc-form .ssc-line-field input[type="text"]:hover,
+.ssc-form .ssc-line-field input[type="number"]:hover {
+	border-color: #cbd5e1;
+	background-color: #fafbfc;
+}
+
+.ssc-form .ssc-line-field select:focus,
+.ssc-form .ssc-line-field input[type="text"]:focus,
+.ssc-form .ssc-line-field input[type="number"]:focus {
+	outline: none;
+	border-color: var(--ssc-focus);
+	background-color: #fff;
+}
+
+.ssc-form .ssc-line-field select:focus {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%233b5f8f' d='M1.4 0L6 4.3 10.6 0 12 1.3 6.2 6.4c-.1.1-.2.1-.2.1-.1.1-.2.1-.2.1s-.1 0-.2-.1c-.1 0-.2-.1-.2-.1L0 1.3z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.65rem center;
+	background-size: 0.65rem;
+	padding-right: 2.1rem;
+}
+
+.ssc-form .ssc-add-line {
+	margin-top: 0.1rem;
+	padding: 0.55rem 1rem;
+	border: 1px dashed #94a3b8;
+	background: #fff;
+	color: #475569;
+	border-radius: 8px;
+	font: inherit;
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	width: 100%;
+	transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.ssc-form .ssc-add-line:hover {
+	border-color: var(--ssc-accent);
+	color: var(--ssc-accent);
+	background: #f0f4fa;
+}
+
+/* Submit */
+.ssc-form .ssc-actions {
+	margin: 0.35rem 0 0;
+	padding: 0.25rem 0 0;
+	border-top: 1px solid var(--ssc-line);
+}
+
+.ssc-submit {
+	display: block;
+	width: 100%;
+	padding: 0.8rem 1.35rem;
+	margin-top: 0.35rem;
+	border: 0;
+	background: var(--ssc-accent);
+	color: #f8fafc;
+	border-radius: 10px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.02em;
+	box-shadow: 0 2px 8px rgba(30, 58, 95, 0.28);
+	transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+@media (min-width: 32rem) {
+	.ssc-submit {
+		width: auto;
+		min-width: 9rem;
+	}
+}
+
+.ssc-submit:hover {
+	background: var(--ssc-accent-mid);
+	box-shadow: 0 4px 12px rgba(30, 58, 95, 0.32);
+}
+
+.ssc-submit:active {
+	transform: translateY(1px);
+}
+
+/* Notices */
+.ssc-notice {
+	padding: 0.8rem 1.05rem;
+	margin: 0 0 1.1rem;
+	border-radius: var(--ssc-radius-sm);
+	border: 1px solid transparent;
+	font-size: 0.95rem;
+	line-height: 1.45;
+}
+
+.ssc-notice--ok {
+	background: #ecfdf3;
+	border-color: #a7e9c0;
+	color: #166534;
+}
+
+.ssc-notice--err {
+	background: #fff1f1;
+	border-color: #f5a8a0;
+	color: #991b1b;
+}
