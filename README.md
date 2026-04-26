@@ -146,3 +146,4 @@ um `FTP_*` secrets eru sett. Sama hugskot sum í
 ## Version
 
 Sjá `SSC_VERSION` í `steinum-sport-clothes.php`.
+ 
