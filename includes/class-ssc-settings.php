@@ -77,9 +77,7 @@ class SSC_Settings {
 	}
 
 	public function render_page(): void {
-		$opts          = self::current();
-		$wp_admin_mail = (string) get_option( 'admin_email', '' );
-		$test_admin    = (string) ( $opts['admin_to'] ?: $wp_admin_mail );
+		$opts = self::current();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Steinum Sport – Stillingar', 'steinum-sport-clothes' ); ?></h1>
@@ -136,6 +134,7 @@ class SSC_Settings {
 			<hr />
 			<h2><?php esc_html_e( 'Royndar-tilkunn', 'steinum-sport-clothes' ); ?></h2>
 			<p><?php esc_html_e( 'Send eina tilkunn við royndarinnihaldi til at vita um teldupostur, PDF og DB-goymsla virka.', 'steinum-sport-clothes' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Trýst teldupostir inn. Um eitt felt er tómt, verður sjálvvirkið brúkt »Admin teldupostur« (móttakari) og »teldupostur hjá síðarhaldara« (sendur og gjalding).', 'steinum-sport-clothes' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="ssc-test-tilkunn-form">
 				<?php wp_nonce_field( 'ssc_send_test' ); ?>
 				<input type="hidden" name="action" value="ssc_send_test" />
@@ -143,47 +142,27 @@ class SSC_Settings {
 					<tr>
 						<th scope="row"><label for="ssc_test_admin_email"><?php esc_html_e( 'Tann ið móttekur ordran', 'steinum-sport-clothes' ); ?></label></th>
 						<td>
-							<input type="email" id="ssc_test_admin_email" name="ssc_test_admin_email" value="<?php echo esc_attr( $test_admin ); ?>" class="regular-text" />
+							<input type="email" id="ssc_test_admin_email" name="ssc_test_admin_email" value="" class="regular-text" autocomplete="off" />
 							<p class="description"><?php esc_html_e( 'Móttakari av admin-tilkunnini (við Excel).', 'steinum-sport-clothes' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="ssc_test_contact_email"><?php esc_html_e( 'Tann ið sendur ordran', 'steinum-sport-clothes' ); ?></label></th>
 						<td>
-							<input type="email" id="ssc_test_contact_email" name="ssc_test_contact_email" value="<?php echo esc_attr( $wp_admin_mail ); ?>" class="regular-text" />
+							<input type="email" id="ssc_test_contact_email" name="ssc_test_contact_email" value="" class="regular-text" autocomplete="off" />
 							<p class="description"><?php esc_html_e( 'Kontaktpersóns teldupost — har sendist PDF-kvittan.', 'steinum-sport-clothes' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="ssc_test_billing_email"><?php esc_html_e( 'Tann ið skal gjalda ordran', 'steinum-sport-clothes' ); ?></label></th>
 						<td>
-							<input type="email" id="ssc_test_billing_email" name="ssc_test_billing_email" value="<?php echo esc_attr( $wp_admin_mail ); ?>" class="regular-text" />
+							<input type="email" id="ssc_test_billing_email" name="ssc_test_billing_email" value="" class="regular-text" autocomplete="off" />
 							<p class="description"><?php esc_html_e( 'Rokning / fakturering — bert í tilkunnarinnihaldinum (einki særskilt teldupost til hetta í royndini).', 'steinum-sport-clothes' ); ?></p>
 						</td>
 					</tr>
 				</table>
 				<?php submit_button( __( 'Send royndar-tilkunn', 'steinum-sport-clothes' ), 'secondary', 'submit', false ); ?>
 			</form>
-
-			<hr />
-			<h2><?php esc_html_e( 'Próvingarhamur', 'steinum-sport-clothes' ); ?></h2>
-			<table class="widefat striped" style="max-width:720px">
-				<tbody>
-					<tr><th><?php esc_html_e( 'Próvingarhamur', 'steinum-sport-clothes' ); ?></th>
-						<td><?php echo SSC_Mail::is_test_mode() ? '<strong>Á</strong>' : 'Av'; ?></td></tr>
-					<tr><th><?php esc_html_e( 'Dry run', 'steinum-sport-clothes' ); ?></th>
-						<td><?php echo SSC_Mail::is_dry_run() ? '<strong>Á</strong>' : 'Av'; ?></td></tr>
-					<tr><th><?php esc_html_e( 'Royndar-móttakari', 'steinum-sport-clothes' ); ?></th>
-						<td><?php echo esc_html( SSC_Mail::test_to() ); ?></td></tr>
-					<tr><th><?php esc_html_e( 'Log-fíla', 'steinum-sport-clothes' ); ?></th>
-						<td><code><?php echo esc_html( SSC_Logger::path() ); ?></code></td></tr>
-				</tbody>
-			</table>
-
-			<?php if ( SSC_Mail::is_test_mode() ) : ?>
-				<h3><?php esc_html_e( 'Seinastu log-linjur', 'steinum-sport-clothes' ); ?></h3>
-				<pre style="background:#111;color:#0f0;padding:12px;max-height:300px;overflow:auto;"><?php echo esc_html( SSC_Logger::tail( 6000 ) ); ?></pre>
-			<?php endif; ?>
 		</div>
 		<?php
 	}
