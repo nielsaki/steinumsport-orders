@@ -268,6 +268,59 @@
 	setTimeout(bootLineUi, 100);
 	setTimeout(bootLineUi, 500);
 
+	/**
+	 * Full-page cache often serves a stale _wpnonce; fetch a fresh one right before POST.
+	 * Uses native form.submit() after updating the field so this handler does not loop.
+	 */
+	(function attachFreshNonceOnSubmit() {
+		var busy = false;
+		document.addEventListener(
+			'submit',
+			function (e) {
+				var form = e.target;
+				if (!form || !form.classList || !form.classList.contains('ssc-form')) {
+					return;
+				}
+				var cfg = window.sscFormAjax;
+				if (!cfg || !cfg.ajaxUrl || !cfg.action || busy) {
+					return;
+				}
+				var nonceInput = form.querySelector('input[name="_wpnonce"]');
+				if (!nonceInput) {
+					return;
+				}
+				e.preventDefault();
+				busy = true;
+				var sep = cfg.ajaxUrl.indexOf('?') >= 0 ? '&' : '?';
+				var url =
+					cfg.ajaxUrl +
+					sep +
+					'action=' +
+					encodeURIComponent(cfg.action) +
+					'&_=' +
+					String(Date.now());
+				fetch(url, { credentials: 'same-origin', cache: 'no-store' })
+					.then(function (r) {
+						return r.json().catch(function () {
+							return null;
+						});
+					})
+					.then(function (j) {
+						if (j && j.success && j.data && j.data.nonce) {
+							nonceInput.value = j.data.nonce;
+						}
+						busy = false;
+						HTMLFormElement.prototype.submit.call(form);
+					})
+					.catch(function () {
+						busy = false;
+						HTMLFormElement.prototype.submit.call(form);
+					});
+			},
+			true
+		);
+	})();
+
 	/** Fallback for rare environments that skip delegated `change` (some mobile / shadow roots). */
 	window.sscLineItemChanged = function (selectEl) {
 		var r = selectEl && selectEl.closest && selectEl.closest('.ssc-line-row');

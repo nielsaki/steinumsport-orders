@@ -16,6 +16,8 @@ class SSC_Form {
 
 	public const ACTION    = 'ssc_submit';
 	public const NONCE     = 'ssc_form';
+	/** @var string AJAX action for fetching a fresh nonce (avoids stale nonces from full-page cache). */
+	public const AJAX_FRESH_NONCE = 'ssc_form_fresh_nonce';
 	public const SHORTCODE = 'steinum_sport_clothes_form';
 	public const SHORTCODE_ALIAS = 'ssc_form';
 
@@ -24,6 +26,21 @@ class SSC_Form {
 		add_shortcode( self::SHORTCODE_ALIAS, array( $this, 'render' ) );
 		add_action( 'init', array( $this, 'maybe_handle_submit' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
+		add_action( 'wp_ajax_' . self::AJAX_FRESH_NONCE, array( $this, 'ajax_fresh_nonce' ) );
+		add_action( 'wp_ajax_nopriv_' . self::AJAX_FRESH_NONCE, array( $this, 'ajax_fresh_nonce' ) );
+	}
+
+	/**
+	 * Public AJAX: returns a new nonce for the order form (same as wp_nonce_field( ssc_form )).
+	 * Safe to expose: it only allows matching our existing POST handler + honeypot + server validation.
+	 */
+	public function ajax_fresh_nonce(): void {
+		nocache_headers();
+		wp_send_json_success(
+			array(
+				'nonce' => wp_create_nonce( self::NONCE ),
+			)
+		);
 	}
 
 	public function register_assets(): void {
@@ -453,8 +470,15 @@ class SSC_Form {
 			return;
 		}
 		$l10n_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $l10n ) : (string) json_encode( $l10n );
+		$ajax_cfg  = array(
+			'ajaxUrl' => function_exists( 'admin_url' ) ? admin_url( 'admin-ajax.php' ) : '',
+			'action'  => self::AJAX_FRESH_NONCE,
+		);
+		$ajax_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $ajax_cfg ) : (string) json_encode( $ajax_cfg );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
 		echo '<script>window.sscLinesL10n=' . $l10n_json . ";</script>\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
+		echo '<script>window.sscFormAjax=' . $ajax_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static asset from disk, not user input.
 		echo '<script id="ssc-order-lines-js">' . $js . "</script>\n";
 	}

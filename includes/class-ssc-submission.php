@@ -79,7 +79,12 @@ class SSC_Submission {
 			SSC_Mail::TYPE_ADMIN
 		);
 
-		if ( $settings['receipt_enabled'] && '' !== $customer_to ) {
+		$admin_to_norm = strtolower( trim( (string) $admin_to ) );
+		$customer_norm = strtolower( trim( $customer_to ) );
+		// Same inbox already gets the admin mail (full detail + attachments); skip duplicate kvittan.
+		$receipt_redundant = '' !== $admin_to_norm && $admin_to_norm === $customer_norm;
+
+		if ( $settings['receipt_enabled'] && '' !== $customer_to && ! $receipt_redundant ) {
 			SSC_Mail::send(
 				$customer_to,
 				$customer_subj,
