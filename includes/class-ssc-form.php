@@ -87,15 +87,40 @@ class SSC_Form {
 		);
 	}
 
-	private function redirect_target( bool $ok ): string {
+	/**
+	 * Where to send the user after POST (strip prior flash params so URLs stay clean).
+	 */
+	private function redirect_base_url(): string {
 		$ref = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( (string) $_SERVER['HTTP_REFERER'] ) ) : '';
 		if ( '' === $ref ) {
 			$ref = home_url( '/' );
 		}
-		return add_query_arg(
-			array( 'ssc_status' => $ok ? 'ok' : 'fail' ),
-			$ref
-		);
+		return remove_query_arg( array( 'ssc_status', 'ssc_f' ), $ref );
+	}
+
+	/**
+	 * Redirect with optional one-time flash payload (survives proxies; avoids IP+UA transient mismatch).
+	 *
+	 * @param array<int, string> $errors Sanitizer field keys or __nonce / __mail / __honeypot.
+	 * @param array<string, mixed> $input  Sanitized form values for repopulating fields.
+	 */
+	private function redirect_after_submit( bool $ok, array $errors = array(), array $input = array() ): void {
+		$ref  = $this->redirect_base_url();
+		$args = array( 'ssc_status' => $ok ? 'ok' : 'fail' );
+		if ( ! $ok && ( $errors || $input ) ) {
+			$token = wp_generate_password( 48, false, false );
+			set_transient(
+				'ssc_flash_' . $token,
+				array(
+					'errors' => $errors,
+					'input'  => $input,
+				),
+				5 * MINUTE_IN_SECONDS
+			);
+			$args['ssc_f'] = $token;
+		}
+		wp_safe_redirect( add_query_arg( $args, $ref ) );
+		exit;
 	}
 
 	public function maybe_handle_submit(): void {
@@ -104,8 +129,7 @@ class SSC_Form {
 		}
 		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['_wpnonce'] ) ) : '';
 		if ( ! wp_verify_nonce( $nonce, self::NONCE ) ) {
-			wp_safe_redirect( $this->redirect_target( false ) );
-			exit;
+			$this->redirect_after_submit( false, array( '__nonce' ), array() );
 		}
 
 		$raw    = wp_unslash( $_POST );
@@ -117,18 +141,38 @@ class SSC_Form {
 		}
 
 		if ( $errors ) {
-			set_transient( 'ssc_errors_' . self::client_key(), $errors, 60 );
-			set_transient( 'ssc_input_' . self::client_key(), $data, 60 );
-			wp_safe_redirect( $this->redirect_target( false ) );
-			exit;
+			$this->redirect_after_submit( false, $errors, $data );
 		}
 
 		$ok = ( new SSC_Submission() )->handle( $data );
 
-		delete_transient( 'ssc_errors_' . self::client_key() );
-		delete_transient( 'ssc_input_' . self::client_key() );
-		wp_safe_redirect( $this->redirect_target( $ok ) );
-		exit;
+		$key = self::client_key();
+		delete_transient( 'ssc_errors_' . $key );
+		delete_transient( 'ssc_input_' . $key );
+
+		if ( ! $ok ) {
+			$this->redirect_after_submit( false, array( '__mail' ), $data );
+		}
+
+		$this->redirect_after_submit( true );
+	}
+
+	/**
+	 * User-visible text for the red banner on ssc_status=fail.
+	 *
+	 * @param array<int, string> $errors
+	 */
+	private static function fail_notice_message( array $errors ): string {
+		if ( in_array( '__nonce', $errors, true ) ) {
+			return __( 'Trygdarpolásturin er útgingin. Endurles síðuna og royn aftur.', 'steinum-sport-clothes' );
+		}
+		if ( in_array( '__mail', $errors, true ) ) {
+			return __( 'Teldupostur gekk ikki at senda frá netinum. Royn aftur seinni, ella set teg í samband við felagið.', 'steinum-sport-clothes' );
+		}
+		if ( in_array( 'order_lines', $errors, true ) ) {
+			return __( 'Vel minst eitt slag og fyll út øll kneysluð felt í bíleggingum (t.d. kyn, stødd og nøgd).', 'steinum-sport-clothes' );
+		}
+		return __( 'Onkur villa hendi. Vinarliga royn aftur.', 'steinum-sport-clothes' );
 	}
 
 	/**
@@ -264,11 +308,25 @@ class SSC_Form {
 	public function render(): string {
 		wp_enqueue_style( 'ssc-frontend' );
 
-		$labels  = SSC_Sanitizer::labels();
-		$key     = self::client_key();
-		$errors  = (array) get_transient( 'ssc_errors_' . $key );
-		$input   = (array) get_transient( 'ssc_input_' . $key );
-		$lines   = $this->get_lines_for_render( $input );
+		$labels = SSC_Sanitizer::labels();
+		$errors = array();
+		$input  = array();
+
+		$flash_token = isset( $_GET['ssc_f'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['ssc_f'] ) ) : '';
+		if ( '' !== $flash_token && strlen( $flash_token ) <= 64 && preg_match( '/^[A-Za-z0-9]+$/', $flash_token ) ) {
+			$flash = get_transient( 'ssc_flash_' . $flash_token );
+			delete_transient( 'ssc_flash_' . $flash_token );
+			if ( is_array( $flash ) ) {
+				$errors = isset( $flash['errors'] ) && is_array( $flash['errors'] ) ? $flash['errors'] : array();
+				$input  = isset( $flash['input'] ) && is_array( $flash['input'] ) ? $flash['input'] : array();
+			}
+		} else {
+			$key    = self::client_key();
+			$errors = (array) get_transient( 'ssc_errors_' . $key );
+			$input  = (array) get_transient( 'ssc_input_' . $key );
+		}
+
+		$lines = $this->get_lines_for_render( $input );
 
 		ob_start();
 		$status = isset( $_GET['ssc_status'] ) ? (string) $_GET['ssc_status'] : '';
@@ -277,9 +335,8 @@ class SSC_Form {
 				. esc_html__( 'Takk fyri! Innskráseting móttikin.', 'steinum-sport-clothes' )
 				. '</div>';
 		} elseif ( 'fail' === $status ) {
-			echo '<div class="ssc-notice ssc-notice--err" role="alert">'
-				. esc_html__( 'Onkur villa hendi. Vinarliga royn aftur.', 'steinum-sport-clothes' )
-				. '</div>';
+			$fail_msg = self::fail_notice_message( $errors );
+			echo '<div class="ssc-notice ssc-notice--err" role="alert">' . esc_html( $fail_msg ) . '</div>';
 		}
 		?>
 		<form class="ssc-form" method="post">
