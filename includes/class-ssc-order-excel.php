@@ -1,6 +1,7 @@
 <?php
 /**
- * Admin-only order sheet as Excel 2003 XML (opens in Microsoft Excel, no extra PHP deps).
+ * Admin order sheet: **.xlsx** (Office Open XML) when ZipArchive exists; else SpreadsheetML **.xml**.
+ * (Legacy `.xls` + XML content triggered Excel “format and extension don’t match”.)
  *
  * Layout (A–C unused):
  * - E1 “Name of club”, E2 “Name of boat” — black on gray. F1 club, F2 boat — red, no fill.
@@ -33,7 +34,7 @@ class SSC_Order_Excel {
 
 	/**
 	 * @param array<string, mixed> $data Sanitized submission.
-	 * @return string Path to a temporary .xls (XML) file, or empty string.
+	 * @return string Path to a temporary `.xlsx` or `.xml` file, or empty string.
 	 */
 	public static function write_file( array $data ): string {
 		$dir = self::storage_dir();
@@ -43,11 +44,196 @@ class SSC_Order_Excel {
 		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) {
 			return '';
 		}
-		$path = rtrim( $dir, '/\\' ) . '/' . gmdate( 'Ymd-His' ) . '-order.xls';
+		$base = rtrim( $dir, '/\\' ) . '/' . gmdate( 'Ymd-His' ) . '-order';
+		$xlsx = $base . '.xlsx';
+		if ( self::write_xlsx_file( $xlsx, $data ) ) {
+			return $xlsx;
+		}
+		$xml  = $base . '.xml';
 		$body = self::to_spreadsheetml( $data );
 		$out  = "\xEF\xBB\xBF" . $body;
-		$ok   = ( false !== @file_put_contents( $path, $out ) ) && is_readable( $path );
-		return $ok ? $path : '';
+		$ok   = ( false !== @file_put_contents( $xml, $out ) ) && is_readable( $xml );
+		return $ok ? $xml : '';
+	}
+
+	/**
+	 * True Excel workbook (OOXML). Requires PHP zip extension.
+	 */
+	private static function write_xlsx_file( string $path, array $data ): bool {
+		if ( ! class_exists( 'ZipArchive' ) ) {
+			return false;
+		}
+		$zip = new ZipArchive();
+		if ( true !== @$zip->open( $path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
+			return false;
+		}
+		$zip->addFromString( '[Content_Types].xml', self::ooxml_content_types() );
+		$zip->addFromString( '_rels/.rels', self::ooxml_rels_root() );
+		$zip->addFromString( 'xl/workbook.xml', self::ooxml_workbook() );
+		$zip->addFromString( 'xl/_rels/workbook.xml.rels', self::ooxml_workbook_rels() );
+		$zip->addFromString( 'xl/styles.xml', self::ooxml_styles() );
+		$zip->addFromString( 'xl/worksheets/sheet1.xml', self::ooxml_sheet( $data ) );
+		$zip->addFromString( 'docProps/core.xml', self::ooxml_core() );
+		$zip->addFromString( 'docProps/app.xml', self::ooxml_app() );
+		$zip->close();
+		return is_readable( $path ) && (int) @filesize( $path ) > 64;
+	}
+
+	private static function ooxml_content_types(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+			. '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+			. '<Default Extension="xml" ContentType="application/xml"/>'
+			. '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+			. '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+			. '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+			. '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'
+			. '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>'
+			. '</Types>';
+	}
+
+	private static function ooxml_rels_root(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+			. '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+			. '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'
+			. '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>'
+			. '</Relationships>';
+	}
+
+	private static function ooxml_workbook(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+			. 'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+			. '<sheets><sheet name="Bílleggingar" sheetId="1" r:id="rId1"/></sheets>'
+			. '</workbook>';
+	}
+
+	private static function ooxml_workbook_rels(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+			. '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+			. '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+			. '</Relationships>';
+	}
+
+	private static function ooxml_styles(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+			. '<fonts count="2">'
+			. '<font><sz val="11"/><color rgb="FF000000"/><name val="Arial"/><b/></font>'
+			. '<font><sz val="11"/><color rgb="FFFF0000"/><name val="Arial"/><b/></font>'
+			. '</fonts>'
+			. '<fills count="2">'
+			. '<fill><patternFill patternType="none"/></fill>'
+			. '<fill><patternFill patternType="solid"><fgColor rgb="FFBFBFBF"/></patternFill></fill>'
+			. '</fills>'
+			. '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+			. '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+			. '<cellXfs count="3">'
+			. '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+			. '<xf numFmtId="0" fontId="0" fillId="1" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+			. '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+			. '</cellXfs>'
+			. '</styleSheet>';
+	}
+
+	private static function ooxml_core(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
+			. 'xmlns:dc="http://purl.org/dc/elements/1.1/">'
+			. '<dc:title>Order</dc:title><dc:creator>Steinum Sport</dc:creator>'
+			. '</cp:coreProperties>';
+	}
+
+	private static function ooxml_app(): string {
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">'
+			. '<Application>Steinum Sport</Application></Properties>';
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	private static function ooxml_sheet( array $data ): string {
+		$rows_in = self::table_rows( $data );
+		$max_col = 1;
+		$body    = '';
+		$rnum    = 0;
+		foreach ( $rows_in as $r ) {
+			++$rnum;
+			$h     = (int) ( $r['h'] ?? 16 );
+			$cells = $r['cells'] ?? array();
+			$line  = '<row r="' . $rnum . '" ht="' . $h . '" customHeight="1">';
+			if ( $cells ) {
+				ksort( $cells, SORT_NUMERIC );
+				foreach ( $cells as $col_idx => $cell ) {
+					$ci = (int) $col_idx;
+					if ( $ci > $max_col ) {
+						$max_col = $ci;
+					}
+					$ref = self::col_letter( $ci ) . $rnum;
+					$sid = self::ooxml_style_idx( (string) ( $cell['s'] ?? 'Default' ) );
+					$txt = (string) ( $cell['t'] ?? '' );
+					$line .= '<c r="' . $ref . '" s="' . $sid . '" t="inlineStr"><is>' . self::ooxml_inline_t( $txt ) . '</is></c>';
+				}
+			}
+			$line .= '</row>';
+			$body .= $line;
+		}
+		$last_row = max( 1, $rnum );
+		$dim_end  = self::col_letter( max( 8, $max_col ) ) . $last_row;
+		return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+			. '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+			. '<dimension ref="A1:' . $dim_end . '"/>'
+			. self::ooxml_cols( max( 32, $max_col ) )
+			. '<sheetData>' . $body . '</sheetData>'
+			. '</worksheet>';
+	}
+
+	private static function ooxml_cols( int $max_col ): string {
+		$out = '<cols>';
+		for ( $i = 1; $i <= $max_col; $i++ ) {
+			$w = ( 5 === $i ) ? 14.5 : 10;
+			$out .= '<col min="' . $i . '" max="' . $i . '" width="' . $w . '" customWidth="1"/>';
+		}
+		$out .= '</cols>';
+		return $out;
+	}
+
+	private static function ooxml_style_idx( string $style_id ): int {
+		if ( 'GrayBlack' === $style_id ) {
+			return 1;
+		}
+		if ( 'RedPlain' === $style_id ) {
+			return 2;
+		}
+		return 0;
+	}
+
+	private static function ooxml_inline_t( string $t ): string {
+		$inner = htmlspecialchars( $t, ENT_XML1 | ENT_QUOTES, 'UTF-8' );
+		$len   = strlen( $t );
+		$preserve = '' !== $t && (
+			( $len > 0 && ' ' === $t[0] )
+			|| ( $len > 0 && ' ' === substr( $t, -1 ) )
+			|| false !== strpos( $t, "\n" )
+		);
+		if ( $preserve ) {
+			return '<t xml:space="preserve">' . $inner . '</t>';
+		}
+		return '<t>' . $inner . '</t>';
+	}
+
+	/** 1-based column index → A, B, … Z, AA, … */
+	private static function col_letter( int $n ): string {
+		$s = '';
+		while ( $n > 0 ) {
+			$m = ( $n - 1 ) % 26;
+			$s = chr( 65 + $m ) . $s;
+			$n = intdiv( $n - 1, 26 );
+		}
+		return '' !== $s ? $s : 'A';
 	}
 
 	/**

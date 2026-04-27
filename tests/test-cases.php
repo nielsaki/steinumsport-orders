@@ -18,7 +18,7 @@ if ( ! defined( 'SSC_TESTING' ) ) {
  *
  * After a successful `ssc_test_submission_pipeline_persists_and_logs` run, open:
  * - last-submission.pdf
- * - last-submission.xls
+ * - last-submission.xlsx
  */
 function ssc_preview_write_pdf( string $bytes, string $filename_base ): void {
 	$dir = __DIR__ . '/preview-pdfs';
@@ -31,17 +31,19 @@ function ssc_preview_write_pdf( string $bytes, string $filename_base ): void {
 }
 
 /**
- * Save SpreadsheetML (Excel 2003 XML) under tests/preview-pdfs/ as .xls.
- * Open in Excel / Numbers / LibreOffice after: php tests/run-tests.php
+ * Copy generated .xlsx to tests/preview-pdfs/ for local inspection.
  */
-function ssc_preview_write_excel( string $xml, string $filename_base ): void {
+function ssc_preview_copy_xlsx( string $src_path, string $filename_base ): void {
+	if ( '' === $src_path || ! is_readable( $src_path ) ) {
+		return;
+	}
 	$dir = __DIR__ . '/preview-pdfs';
 	if ( ! is_dir( $dir ) && ! @mkdir( $dir, 0775, true ) && ! is_dir( $dir ) ) {
 		return;
 	}
 	$base = (string) preg_replace( '/[^a-z0-9._-]+/i', '-', $filename_base );
 	$base = trim( $base, '-.' ) ?: 'preview';
-	@file_put_contents( $dir . '/' . $base . '.xls', $xml );
+	@copy( $src_path, $dir . '/' . $base . '.xlsx' );
 }
 
 /* ------------------------------------------------------------------ */
@@ -377,9 +379,9 @@ function ssc_test_submission_pipeline_persists_and_logs(): void {
 	if ( ! is_array( $before ) ) {
 		$before = array();
 	}
-	$before_xls = is_dir( $pdf_dir ) ? glob( $pdf_dir . '/*-order.xls' ) : array();
-	if ( ! is_array( $before_xls ) ) {
-		$before_xls = array();
+	$before_xlsx = is_dir( $pdf_dir ) ? glob( $pdf_dir . '/*-order.xlsx' ) : array();
+	if ( ! is_array( $before_xlsx ) ) {
+		$before_xlsx = array();
 	}
 
 	$ok = ( new SSC_Submission() )->handle( SSC_Form::sample_data( 'kunda@example.com' ) );
@@ -397,7 +399,7 @@ function ssc_test_submission_pipeline_persists_and_logs(): void {
 	ssc_assert_contains( 'TYPE:    Admin tilkunn', $log );
 	ssc_assert_contains( 'TYPE:    Kvittan', $log, 'receipt mail also logged' );
 	ssc_assert_contains( '.pdf', $log, 'PDF attachment logged' );
-	ssc_assert_contains( '.xls', $log, 'admin Excel attachment logged' );
+	ssc_assert_contains( 'order.', $log, 'admin Excel attachment logged' );
 
 	// Full pipeline: PDF bytes + write to disk (not only in-memory render).
 	ssc_assert_true( is_dir( $pdf_dir ), 'PDF upload subdir created' );
@@ -423,26 +425,43 @@ function ssc_test_submission_pipeline_persists_and_logs(): void {
 	ssc_assert_true( strlen( $bytes ) > 200, 'PDF non-trivial size' );
 	ssc_preview_write_pdf( $bytes, 'last-submission' );
 
-	$after_xls = glob( $pdf_dir . '/*-order.xls' );
-	if ( ! is_array( $after_xls ) ) {
-		$after_xls = array();
+	$after_xlsx = glob( $pdf_dir . '/*-order.xlsx' );
+	if ( ! is_array( $after_xlsx ) ) {
+		$after_xlsx = array();
 	}
-	$added_xls = array_values( array_diff( $after_xls, $before_xls ) );
-	$xls_path  = (string) ( $added_xls[0] ?? '' );
-	if ( '' === $xls_path && $after_xls ) {
+	$added_xlsx = array_values( array_diff( $after_xlsx, $before_xlsx ) );
+	$xlsx_path  = (string) ( $added_xlsx[0] ?? '' );
+	if ( '' === $xlsx_path && $after_xlsx ) {
 		usort(
-			$after_xls,
+			$after_xlsx,
 			static function ( $a, $b ) {
 				return ( (int) @filemtime( $b ) ) <=> ( (int) @filemtime( $a ) );
 			}
 		);
-		$xls_path = (string) ( $after_xls[0] ?? '' );
+		$xlsx_path = (string) ( $after_xlsx[0] ?? '' );
 	}
-	if ( $xls_path !== '' && is_readable( $xls_path ) ) {
-		$xls_bytes = (string) file_get_contents( $xls_path );
-		ssc_assert_contains( '<?mso-application progid="Excel.Sheet"?>', $xls_bytes, 'xls is SpreadsheetML' );
-		ssc_assert_false( str_contains( $xls_bytes, 'SpeedCoach' ), 'SpeedCoach not in pipeline Excel' );
-		ssc_assert_false( str_contains( $xls_bytes, 'NK Stopur' ), 'NK Stopur not in pipeline Excel' );
-		ssc_preview_write_excel( $xls_bytes, 'last-submission' );
+	if ( $xlsx_path !== '' && is_readable( $xlsx_path ) ) {
+		$xlsx_head = (string) file_get_contents( $xlsx_path, false, null, 0, 4 );
+		ssc_assert_eq( 'PK' . chr( 0x03 ) . chr( 0x04 ), $xlsx_head, 'order file is a ZIP (.xlsx)' );
+		if ( class_exists( 'ZipArchive' ) ) {
+			$z = new ZipArchive();
+			ssc_assert_true( $z->open( $xlsx_path ) === true, 'open xlsx zip' );
+			$sheet = (string) $z->getFromName( 'xl/worksheets/sheet1.xml' );
+			$z->close();
+			ssc_assert_contains( 'QTY', $sheet, 'xlsx sheet has QTY' );
+			ssc_assert_contains( 'PRODUCT', $sheet, 'xlsx sheet has PRODUCT' );
+			ssc_assert_false( str_contains( $sheet, 'SpeedCoach' ), 'SpeedCoach not in pipeline Excel' );
+			ssc_assert_false( str_contains( $sheet, 'NK Stopur' ), 'NK Stopur not in pipeline Excel' );
+		}
+		ssc_preview_copy_xlsx( $xlsx_path, 'last-submission' );
+	} else {
+		$after_xml = glob( $pdf_dir . '/*-order.xml' );
+		if ( ! is_array( $after_xml ) ) {
+			$after_xml = array();
+		}
+		$xml_path = (string) ( $after_xml[0] ?? '' );
+		ssc_assert_true( $xml_path !== '' && is_readable( $xml_path ), 'order spreadsheet (.xlsx or fallback .xml) on disk' );
+		$xml_bytes = (string) file_get_contents( $xml_path );
+		ssc_assert_contains( '<?mso-application progid="Excel.Sheet"?>', $xml_bytes, 'fallback xml is SpreadsheetML' );
 	}
 }

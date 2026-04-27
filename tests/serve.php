@@ -46,10 +46,10 @@ SSC_Store::maybe_install();
 
 // Mirror the last PDF + admin Excel to fixed paths so the local UI can link to them.
 $ssc_preview_last_pdf = __DIR__ . '/preview-pdfs/last-submission.pdf';
-$ssc_preview_last_xls = __DIR__ . '/preview-pdfs/last-submission.xls';
+$ssc_preview_last_xlsx = __DIR__ . '/preview-pdfs/last-submission.xlsx';
 add_action(
 	'ssc_after_submission',
-	static function ( $id, $data, $pdf_path, $xlsx_path = '' ) use ( $ssc_preview_last_pdf, $ssc_preview_last_xls ) {
+	static function ( $id, $data, $pdf_path, $xlsx_path = '' ) use ( $ssc_preview_last_pdf, $ssc_preview_last_xlsx ) {
 		unset( $id, $data );
 		$dir = dirname( $ssc_preview_last_pdf );
 		if ( ! is_dir( $dir ) ) {
@@ -59,7 +59,7 @@ add_action(
 			@copy( $pdf_path, $ssc_preview_last_pdf );
 		}
 		if ( is_string( $xlsx_path ) && '' !== $xlsx_path && is_readable( $xlsx_path ) ) {
-			@copy( $xlsx_path, $ssc_preview_last_xls );
+			@copy( $xlsx_path, $ssc_preview_last_xlsx );
 		}
 	},
 	10,
@@ -205,9 +205,9 @@ if ( isset( $_GET['ssc_status'] ) ) {
 $ssc_last_pdf_href  = is_readable( $ssc_preview_last_pdf ) ? '/tests/preview-pdfs/last-submission.pdf' : '';
 $ssc_last_pdf_ctime = ( '' !== $ssc_last_pdf_href && is_file( $ssc_preview_last_pdf ) ) ? (int) filemtime( $ssc_preview_last_pdf ) : 0;
 $ssc_open_pdf_href  = ( '' !== $ssc_last_pdf_href && $ssc_last_pdf_ctime > 0 ) ? ( $ssc_last_pdf_href . '?v=' . $ssc_last_pdf_ctime ) : '';
-$ssc_last_xls_href  = is_readable( $ssc_preview_last_xls ) ? '/tests/preview-pdfs/last-submission.xls' : '';
-$ssc_last_xls_ctime = ( '' !== $ssc_last_xls_href && is_file( $ssc_preview_last_xls ) ) ? (int) filemtime( $ssc_preview_last_xls ) : 0;
-$ssc_open_xls_href  = ( '' !== $ssc_last_xls_href && $ssc_last_xls_ctime > 0 ) ? ( $ssc_last_xls_href . '?v=' . $ssc_last_xls_ctime ) : '';
+$ssc_last_xlsx_href  = is_readable( $ssc_preview_last_xlsx ) ? '/tests/preview-pdfs/last-submission.xlsx' : '';
+$ssc_last_xlsx_ctime = ( '' !== $ssc_last_xlsx_href && is_file( $ssc_preview_last_xlsx ) ) ? (int) filemtime( $ssc_preview_last_xlsx ) : 0;
+$ssc_open_xlsx_href  = ( '' !== $ssc_last_xlsx_href && $ssc_last_xlsx_ctime > 0 ) ? ( $ssc_last_xlsx_href . '?v=' . $ssc_last_xlsx_ctime ) : '';
 
 $ssc_wp_base         = rtrim( getenv( 'SSC_WP_SITEURL' ) ? (string) getenv( 'SSC_WP_SITEURL' ) : 'http://localhost:8080', '/' );
 $ssc_url_submissions = esc_url( $ssc_wp_base . '/wp-admin/admin.php?page=' . SSC_Admin_Submissions::PAGE );
@@ -375,8 +375,8 @@ $frontend_css = (string) @file_get_contents( dirname( __DIR__ ) . '/assets/css/f
 				<?php if ( '' !== $ssc_open_pdf_href ) : ?>
 					<a class="pdf-btn" href="<?php echo esc_url( $ssc_open_pdf_href ); ?>" target="_blank" rel="noopener">Sí seinasta PDF</a>
 				<?php endif; ?>
-				<?php if ( '' !== $ssc_open_xls_href ) : ?>
-					<a class="pdf-btn" href="<?php echo esc_url( $ssc_open_xls_href ); ?>" target="_blank" rel="noopener" download>Seinasta Excel</a>
+				<?php if ( '' !== $ssc_open_xlsx_href ) : ?>
+					<a class="pdf-btn" href="<?php echo esc_url( $ssc_open_xlsx_href ); ?>" target="_blank" rel="noopener" download>Seinasta Excel</a>
 				<?php endif; ?>
 			</div>
 		</div>
@@ -441,13 +441,13 @@ $frontend_css = (string) @file_get_contents( dirname( __DIR__ ) . '/assets/css/f
 				</div>
 			</header>
 			<div class="s-panel__body">
-				<?php if ( '' !== $ssc_open_pdf_href || '' !== $ssc_open_xls_href ) : ?>
+				<?php if ( '' !== $ssc_open_pdf_href || '' !== $ssc_open_xlsx_href ) : ?>
 					<div class="s-panel--skjal__row">
 						<?php if ( '' !== $ssc_open_pdf_href ) : ?>
 							<a href="<?php echo esc_url( $ssc_open_pdf_href ); ?>" target="_blank" rel="noopener">Sí seinasta PDF</a>
 						<?php endif; ?>
-						<?php if ( '' !== $ssc_open_xls_href ) : ?>
-							<a href="<?php echo esc_url( $ssc_open_xls_href ); ?>" target="_blank" rel="noopener" download>Tak niður Excel</a>
+						<?php if ( '' !== $ssc_open_xlsx_href ) : ?>
+							<a href="<?php echo esc_url( $ssc_open_xlsx_href ); ?>" target="_blank" rel="noopener" download>Tak niður Excel</a>
 						<?php endif; ?>
 					</div>
 					<p class="s-panel--wp__p" style="margin-top:0.75rem;">Hetta eru skjalin frá <strong>seinastu innsend</strong> á hesum próvingarserverinum — tað samsvarar teldupostinum í logginum.</p>

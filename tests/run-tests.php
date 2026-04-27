@@ -82,13 +82,13 @@ echo "{$count} tests, {$ssc_test_assertions} assertions, {$failed} failed ({$ela
 $preview_dir = __DIR__ . '/preview-pdfs';
 if ( 0 === $failed && is_dir( $preview_dir ) ) {
 	$has_pdf  = (bool) glob( $preview_dir . '/*.pdf' );
-	$has_xls  = (bool) glob( $preview_dir . '/*.xls' );
-	if ( $has_pdf || $has_xls ) {
+	$has_xlsx = (bool) glob( $preview_dir . '/*.xlsx' );
+	if ( $has_pdf || $has_xlsx ) {
 		$kinds = array();
 		if ( $has_pdf ) {
 			$kinds[] = 'PDF';
 		}
-		if ( $has_xls ) {
+		if ( $has_xlsx ) {
 			$kinds[] = 'Excel';
 		}
 		echo implode( ' + ', $kinds ) . ' previews: ' . $preview_dir . "\n";

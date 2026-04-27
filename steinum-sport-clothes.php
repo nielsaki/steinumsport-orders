@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Steinum Sport — Klæðir
  * Description:       Form fyri at taka ímóti tilkunnum um klæðir til kappróðrarbátar. Sendir admin-tilkunn + PDF-kvittan til kundan og goymir tilkunnirnar í dátagrunninum.
- * Version:           2.4.3
+ * Version:           2.4.4
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Niels Áki Mørk, Steinum Sport
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SSC_VERSION', '2.4.3' );
+define( 'SSC_VERSION', '2.4.4' );
 define( 'SSC_FILE', __FILE__ );
 define( 'SSC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SSC_URL', plugin_dir_url( __FILE__ ) );
