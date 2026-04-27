@@ -45,11 +45,11 @@
  <Column ss:Index="32" ss:AutoFitWidth="0" ss:Width="65"/>
 <Row ss:Height="18">
  <Cell ss:Index="5" ss:StyleID="GrayBlack"><Data ss:Type="String">Name of club</Data></Cell>
- <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Havnar Róðrarfelag</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Kappróðrarfelag Havnar</Data></Cell>
 </Row>
 <Row ss:Height="18">
  <Cell ss:Index="5" ss:StyleID="GrayBlack"><Data ss:Type="String">Name of boat</Data></Cell>
- <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Havnarbáturin</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">Selin (royndarbátur)</Data></Cell>
 </Row>
 <Row ss:Height="8">
 </Row>
@@ -62,9 +62,16 @@
 </Row>
 <Row ss:Height="16">
  <Cell ss:Index="4" ss:StyleID="RedPlain"><Data ss:Type="String">2</Data></Cell>
- <Cell ss:Index="5" ss:StyleID="RedPlain"><Data ss:Type="String">Profit Tshirt</Data></Cell>
- <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">XL</Data></Cell>
+ <Cell ss:Index="5" ss:StyleID="RedPlain"><Data ss:Type="String">Womens Singlet</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">M</Data></Cell>
  <Cell ss:Index="7" ss:StyleID="RedPlain"><Data ss:Type="String"></Data></Cell>
- <Cell ss:Index="8" ss:StyleID="RedPlain"><Data ss:Type="String"></Data></Cell>
+ <Cell ss:Index="8" ss:StyleID="RedPlain"><Data ss:Type="String">Maria</Data></Cell>
+</Row>
+<Row ss:Height="16">
+ <Cell ss:Index="4" ss:StyleID="RedPlain"><Data ss:Type="String">1</Data></Cell>
+ <Cell ss:Index="5" ss:StyleID="RedPlain"><Data ss:Type="String">Profit Tshirt</Data></Cell>
+ <Cell ss:Index="6" ss:StyleID="RedPlain"><Data ss:Type="String">L</Data></Cell>
+ <Cell ss:Index="7" ss:StyleID="RedPlain"><Data ss:Type="String"></Data></Cell>
+ <Cell ss:Index="8" ss:StyleID="RedPlain"><Data ss:Type="String">Jón</Data></Cell>
 </Row>
 </Table></Worksheet></Workbook>

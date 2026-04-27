@@ -102,7 +102,11 @@ class SSC_Form {
 		if ( empty( $_POST['action'] ) || self::ACTION !== $_POST['action'] ) {
 			return;
 		}
-		check_admin_referer( self::NONCE );
+		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, self::NONCE ) ) {
+			wp_safe_redirect( $this->redirect_target( false ) );
+			exit;
+		}
 
 		$raw    = wp_unslash( $_POST );
 		$data   = SSC_Sanitizer::sanitize( is_array( $raw ) ? $raw : array() );

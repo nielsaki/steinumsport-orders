@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 5165 >>
+<< /Length 5525 >>
 stream
 q
 0.990 0.993 0.997 rg
@@ -64,7 +64,7 @@ Q
 BT
 /F1 8 Tf
 62 713.56 Td
-(Dato · 2026-04-26 00:55) Tj
+(Dato · 2026-04-27 20:26) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -115,7 +115,7 @@ ET
 BT
 /F1 10 Tf
 70 627 Td
-(Havnar Róðrarfelag) Tj
+(Kappróðrarfelag Havnar) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -144,7 +144,7 @@ ET
 BT
 /F1 10 Tf
 70 585 Td
-(Havnarbáturin) Tj
+(Selin \(royndarbátur\)) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -195,7 +195,7 @@ ET
 BT
 /F1 10 Tf
 70 498 Td
-(Niels Áki Mørk) Tj
+(Hans Hansen \(royndarprógv\)) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -224,7 +224,7 @@ ET
 BT
 /F1 10 Tf
 70 456 Td
-(niels.aki.mork@gmail.com) Tj
+(hans@example.com) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -253,7 +253,7 @@ ET
 BT
 /F1 10 Tf
 70 414 Td
-(+298 223336) Tj
+(+298 12 34 56) Tj
 ET
 0.000 0.000 0.000 rg
 q
@@ -303,7 +303,7 @@ Q
 BT
 /F2 11 Tf
 70 324.08 Td
-(steinum@steinum.net) Tj
+(kunda@example.com) Tj
 ET
 0.000 0.000 0.000 rg
 0.000 0.000 0.000 rg
@@ -385,32 +385,32 @@ ET
 BT
 /F1 8 Tf
 81 234.04 Td
-(NK Stopur) Tj
+(Trikot) Tj
 ET
 BT
 /F1 8 Tf
 173 234.04 Td
-(—) Tj
+(Kvinnur) Tj
 ET
 BT
 /F1 8 Tf
 219 234.04 Td
-(—) Tj
+(M) Tj
 ET
 BT
 /F1 8 Tf
 261 234.04 Td
-(Gult) Tj
+(—) Tj
 ET
 BT
 /F1 8 Tf
 331 234.04 Td
-(1) Tj
+(2) Tj
 ET
 BT
 /F1 8 Tf
 365 234.04 Td
-(Dømi 1) Tj
+(Maria) Tj
 ET
 q
 0.975 0.985 0.995 rg
@@ -436,7 +436,7 @@ ET
 BT
 /F1 8 Tf
 219 218.04 Td
-(XL) Tj
+(L) Tj
 ET
 BT
 /F1 8 Tf
@@ -446,59 +446,100 @@ ET
 BT
 /F1 8 Tf
 331 218.04 Td
-(2) Tj
+(1) Tj
 ET
 BT
 /F1 8 Tf
 365 218.04 Td
+(Jón) Tj
+ET
+q
+0.998 0.998 0.999 rg
+56.00 196.00 483.00 16.00 re
+f
+Q
+0.100 0.140 0.200 rg
+BT
+/F2 8 Tf
+64.8 202.04 Td
+(3) Tj
+ET
+BT
+/F1 8 Tf
+81 202.04 Td
+(SpeedCoach) Tj
+ET
+BT
+/F1 8 Tf
+173 202.04 Td
+(—) Tj
+ET
+BT
+/F1 8 Tf
+219 202.04 Td
+(—) Tj
+ET
+BT
+/F1 8 Tf
+261 202.04 Td
+(Gult) Tj
+ET
+BT
+/F1 8 Tf
+331 202.04 Td
+(1) Tj
+ET
+BT
+/F1 8 Tf
+365 202.04 Td
 (—) Tj
 ET
 0.000 0.000 0.000 rg
 q
 0.35 w
 0.800 0.840 0.900 RG
-56.00 212.00 483.00 55.76 re
+56.00 196.00 483.00 71.76 re
 S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-78 212 m 78 267.76 l S
+78 196 m 78 267.76 l S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-170 212 m 170 267.76 l S
+170 196 m 170 267.76 l S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-216 212 m 216 267.76 l S
+216 196 m 216 267.76 l S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-258 212 m 258 267.76 l S
+258 196 m 258 267.76 l S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-328 212 m 328 267.76 l S
+328 196 m 328 267.76 l S
 Q
 q
 0.25 w
 0.88 0.88 0.88 RG
-362 212 m 362 267.76 l S
+362 196 m 362 267.76 l S
 Q
 q
 0.4 w
 0.88 0.88 0.88 RG
-56 202 m 539 202 l S
+56 186 m 539 186 l S
 Q
 0.480 g
 BT
 /F1 7 Tf
-232.5 197 Td
+232.5 181 Td
 (Steinum Sport  ·  kvittan) Tj
 ET
 0.000 0.000 0.000 rg
@@ -516,9 +557,9 @@ xref
 0000000121 00000 n 
 0000000218 00000 n 
 0000000320 00000 n 
-0000005537 00000 n 
+0000005897 00000 n 
 trailer
 << /Size 7 /Root 1 0 R >>
 startxref
-5673
+6033
 %%EOF
