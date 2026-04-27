@@ -23,9 +23,7 @@ class SSC_Settings {
 		return array(
 			'admin_to'        => (string) get_option( 'admin_email', '' ),
 			'admin_subject'   => 'Nýggj tilkunn frá {site} – {club}',
-			'receipt_enabled'         => true,
-			'contact_receipt_enabled' => false,
-			'receipt_subject'         => 'Tín tilkunn er móttikin – {site}',
+			'receipt_subject' => 'Tín tilkunn er móttikin – {site}',
 			'receipt_intro'   => 'Halló og takk fyri tína tilkunn. Vit hava móttikin uppskotið og fylgja tær yvir lutirnar.',
 			'from_name'       => '',
 			'from_email'      => '',
@@ -69,9 +67,7 @@ class SSC_Settings {
 
 		$out['admin_to']        = sanitize_email( (string) ( $in['admin_to'] ?? $d['admin_to'] ) ) ?: (string) $d['admin_to'];
 		$out['admin_subject']   = sanitize_text_field( (string) ( $in['admin_subject'] ?? $d['admin_subject'] ) );
-		$out['receipt_enabled']         = ! empty( $in['receipt_enabled'] );
-		$out['contact_receipt_enabled'] = ! empty( $in['contact_receipt_enabled'] );
-		$out['receipt_subject']         = sanitize_text_field( (string) ( $in['receipt_subject'] ?? $d['receipt_subject'] ) );
+		$out['receipt_subject'] = sanitize_text_field( (string) ( $in['receipt_subject'] ?? $d['receipt_subject'] ) );
 		$out['receipt_intro']   = sanitize_textarea_field( (string) ( $in['receipt_intro'] ?? $d['receipt_intro'] ) );
 		$out['from_name']       = sanitize_text_field( (string) ( $in['from_name'] ?? '' ) );
 		$out['from_email']      = sanitize_email( (string) ( $in['from_email'] ?? '' ) );
@@ -105,26 +101,7 @@ class SSC_Settings {
 						<th><label for="ssc_admin_subject"><?php esc_html_e( 'Admin yvirskrift', 'steinum-sport-clothes' ); ?></label></th>
 						<td>
 							<input type="text" id="ssc_admin_subject" name="<?php echo esc_attr( self::OPTION ); ?>[admin_subject]" value="<?php echo esc_attr( $opts['admin_subject'] ); ?>" class="regular-text" />
-							<p class="description"><?php esc_html_e( 'Til ráðis: {site}, {club}.', 'steinum-sport-clothes' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Send kvittan til kundan', 'steinum-sport-clothes' ); ?></th>
-						<td>
-							<label>
-								<input type="checkbox" name="<?php echo esc_attr( self::OPTION ); ?>[receipt_enabled]" value="1" <?php checked( (bool) $opts['receipt_enabled'] ); ?> />
-								<?php esc_html_e( 'Ja, send eitt PDF-kvittan til faktureringstelduposten', 'steinum-sport-clothes' ); ?>
-							</label>
-						</td>
-					</tr>
-					<tr>
-						<th><?php esc_html_e( 'Send kvittan til kontaktpersón', 'steinum-sport-clothes' ); ?></th>
-						<td>
-							<label>
-								<input type="checkbox" name="<?php echo esc_attr( self::OPTION ); ?>[contact_receipt_enabled]" value="1" <?php checked( (bool) $opts['contact_receipt_enabled'] ); ?> />
-								<?php esc_html_e( 'Ja, send somu PDF-kvittan til teldupostinum hjá kontaktpersóninum', 'steinum-sport-clothes' ); ?>
-							</label>
-							<p class="description"><?php esc_html_e( 'Ikki sendt um telduposturin er sama sum admin, ella longu fekk kvittan sum faktureringsteldupostur.', 'steinum-sport-clothes' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Til ráðis: {site}, {club}, {boat}.', 'steinum-sport-clothes' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -133,7 +110,10 @@ class SSC_Settings {
 					</tr>
 					<tr>
 						<th><label for="ssc_receipt_intro"><?php esc_html_e( 'Kvittan innleiðing', 'steinum-sport-clothes' ); ?></label></th>
-						<td><textarea id="ssc_receipt_intro" name="<?php echo esc_attr( self::OPTION ); ?>[receipt_intro]" rows="4" class="large-text"><?php echo esc_textarea( $opts['receipt_intro'] ); ?></textarea></td>
+						<td>
+							<textarea id="ssc_receipt_intro" name="<?php echo esc_attr( self::OPTION ); ?>[receipt_intro]" rows="4" class="large-text"><?php echo esc_textarea( $opts['receipt_intro'] ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'Hetta teldupostinum (við PDF) verður altíð sent til kontaktpersóns teldupost — ikki til faktureringsteldupost. Ikki sent um kontaktur og admin eru sama teldupostur.', 'steinum-sport-clothes' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th><label for="ssc_from_name"><?php esc_html_e( 'Avsendari (navn)', 'steinum-sport-clothes' ); ?></label></th>

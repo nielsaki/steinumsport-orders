@@ -44,7 +44,7 @@ class SSC_Order_Excel {
 		if ( ! is_dir( $dir ) || ! is_writable( $dir ) ) {
 			return '';
 		}
-		$base = rtrim( $dir, '/\\' ) . '/' . gmdate( 'Ymd-His' ) . '-order';
+		$base = rtrim( $dir, '/\\' ) . '/' . SSC_WP_Time::format( 'Ymd-His' ) . '-order';
 		$xlsx = $base . '.xlsx';
 		if ( self::write_xlsx_file( $xlsx, $data ) ) {
 			return $xlsx;

@@ -397,7 +397,7 @@ function ssc_test_submission_pipeline_persists_and_logs(): void {
 
 	$log = SSC_Logger::tail( 12000 );
 	ssc_assert_contains( 'TYPE:    Admin tilkunn', $log );
-	ssc_assert_contains( 'TYPE:    Kvittan', $log, 'receipt mail also logged' );
+	ssc_assert_contains( 'TYPE:    Kvittan (kontakt)', $log, 'contact receipt mail logged' );
 	ssc_assert_contains( '.pdf', $log, 'PDF attachment logged' );
 	ssc_assert_contains( 'order.', $log, 'admin Excel attachment logged' );
 

@@ -264,6 +264,26 @@ if ( ! function_exists( 'admin_url' ) ) {
 if ( ! function_exists( 'site_url' ) ) {
 	function site_url( $path = '' ) { return home_url( $path ); }
 }
+if ( ! function_exists( 'current_time' ) ) {
+	function current_time( $type, $gmt = false ) {
+		if ( 'timestamp' === $type || 'U' === $type ) {
+			return time();
+		}
+		return gmdate( 'Y-m-d H:i:s', time() );
+	}
+}
+if ( ! function_exists( 'date_i18n' ) ) {
+	function date_i18n( $format, $timestamp = false, $gmt = false ) {
+		$t = false === $timestamp ? time() : (int) $timestamp;
+		return gmdate( $format, $t );
+	}
+}
+if ( ! function_exists( 'wp_date' ) ) {
+	function wp_date( $format, $timestamp = null, $timezone = null ) {
+		$t = null === $timestamp ? time() : (int) $timestamp;
+		return gmdate( $format, $t );
+	}
+}
 if ( ! function_exists( 'add_query_arg' ) ) {
 	function add_query_arg( $key, $value = null, $url = null ) {
 		$args = is_array( $key ) ? $key : array( $key => $value );

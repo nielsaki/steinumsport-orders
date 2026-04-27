@@ -23,16 +23,15 @@ class SSC_Submission {
 	public function handle( array $data ): bool {
 		$labels    = SSC_Sanitizer::labels();
 		$site_name = (string) get_option( 'blogname', '' );
-		$site_url  = (string) get_option( 'siteurl', '' );
 
 		$settings = SSC_Settings::current();
 
 		$admin_to       = $settings['admin_to'];
-		$admin_subject  = self::interpolate( $settings['admin_subject'], $site_name, (string) $data['club_name'] );
+		$boat_name      = (string) ( $data['boat_name'] ?? '' );
+		$admin_subject  = self::interpolate( $settings['admin_subject'], $site_name, (string) $data['club_name'], $boat_name );
 		$admin_body     = SSC_Email_Builder::admin_body( $data, $labels, $site_name );
 
-		$customer_to     = (string) $data['billing_email'];
-		$customer_subj   = self::interpolate( $settings['receipt_subject'], $site_name, (string) $data['club_name'] );
+		$customer_subj   = self::interpolate( $settings['receipt_subject'], $site_name, (string) $data['club_name'], $boat_name );
 		$customer_body   = SSC_Email_Builder::receipt_body( $data, $labels, $settings['receipt_intro'] );
 
 		$pdf_path = '';
@@ -42,7 +41,7 @@ class SSC_Submission {
 				$labels,
 				$settings['pdf_title'],
 				array(
-					'Dato' => gmdate( 'Y-m-d H:i' ),
+					'Dato' => SSC_WP_Time::format( 'Y-m-d H:i' ),
 				)
 			);
 			$pdf_path = self::store_pdf( $pdf, (string) $data['club_name'], (string) $data['boat_name'] );
@@ -80,33 +79,13 @@ class SSC_Submission {
 		);
 
 		$admin_to_norm = strtolower( trim( (string) $admin_to ) );
-		$customer_norm = strtolower( trim( $customer_to ) );
-		// Same inbox already gets the admin mail (full detail + attachments); skip duplicate kvittan.
-		$receipt_redundant = '' !== $admin_to_norm && $admin_to_norm === $customer_norm;
 
-		$sent_billing_receipt = false;
-		if ( $settings['receipt_enabled'] && '' !== $customer_to && ! $receipt_redundant ) {
-			$sent_billing_receipt = SSC_Mail::send(
-				$customer_to,
-				$customer_subj,
-				$customer_body,
-				$headers,
-				$pdf_path ? array( $pdf_path ) : array(),
-				SSC_Mail::TYPE_RECEIPT
-			);
-		}
-
-		$contact_to    = strtolower( trim( (string) ( $data['contact_email'] ?? '' ) ) );
+		// Kvittan: always to contact email (not billing); skip if same inbox as admin notification.
+		$contact_norm  = strtolower( trim( (string) ( $data['contact_email'] ?? '' ) ) );
 		$contact_email = (string) ( $data['contact_email'] ?? '' );
-		$contact_ok    = '' !== $contact_to && false !== filter_var( $contact_email, FILTER_VALIDATE_EMAIL );
-		$contact_dup_admin = '' !== $admin_to_norm && $admin_to_norm === $contact_to;
-		$contact_dup_bill  = $sent_billing_receipt && $contact_to === $customer_norm;
-		if (
-			! empty( $settings['contact_receipt_enabled'] )
-			&& $contact_ok
-			&& ! $contact_dup_admin
-			&& ! $contact_dup_bill
-		) {
+		$contact_ok    = '' !== $contact_norm && false !== filter_var( $contact_email, FILTER_VALIDATE_EMAIL );
+		$contact_dup_admin = '' !== $admin_to_norm && $admin_to_norm === $contact_norm;
+		if ( $contact_ok && ! $contact_dup_admin ) {
 			SSC_Mail::send(
 				$contact_email,
 				$customer_subj,
@@ -122,12 +101,13 @@ class SSC_Submission {
 		return $admin_ok;
 	}
 
-	private static function interpolate( string $template, string $site, string $club ): string {
+	private static function interpolate( string $template, string $site, string $club, string $boat = '' ): string {
 		return strtr(
 			$template,
 			array(
 				'{site}' => $site,
 				'{club}' => $club,
+				'{boat}' => $boat,
 			)
 		);
 	}
@@ -146,7 +126,7 @@ class SSC_Submission {
 		}
 		$slug = strtolower( preg_replace( '/[^a-z0-9]+/i', '-', $club . '-' . $boat ) ?: 'order' );
 		$slug = trim( (string) $slug, '-' ) ?: 'order';
-		$file = $dir . '/' . gmdate( 'Ymd-His' ) . '-' . $slug . '.pdf';
+		$file = $dir . '/' . SSC_WP_Time::format( 'Ymd-His' ) . '-' . $slug . '.pdf';
 		$ok   = (bool) @file_put_contents( $file, $bytes );
 		return $ok ? $file : '';
 	}
