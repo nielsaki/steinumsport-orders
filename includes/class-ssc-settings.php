@@ -77,7 +77,9 @@ class SSC_Settings {
 	}
 
 	public function render_page(): void {
-		$opts = self::current();
+		$opts          = self::current();
+		$wp_admin_mail = (string) get_option( 'admin_email', '' );
+		$test_admin    = (string) ( $opts['admin_to'] ?: $wp_admin_mail );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Steinum Sport – Stillingar', 'steinum-sport-clothes' ); ?></h1>
@@ -134,10 +136,32 @@ class SSC_Settings {
 			<hr />
 			<h2><?php esc_html_e( 'Royndar-tilkunn', 'steinum-sport-clothes' ); ?></h2>
 			<p><?php esc_html_e( 'Send eina tilkunn við royndarinnihaldi til at vita um teldupostur, PDF og DB-goymsla virka.', 'steinum-sport-clothes' ); ?></p>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="ssc-test-tilkunn-form">
 				<?php wp_nonce_field( 'ssc_send_test' ); ?>
 				<input type="hidden" name="action" value="ssc_send_test" />
-				<input type="email" name="test_email" placeholder="<?php esc_attr_e( 'Faktureringsteldupostur (valfrítt)', 'steinum-sport-clothes' ); ?>" class="regular-text" />
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><label for="ssc_test_admin_email"><?php esc_html_e( 'Tann ið móttekur ordran', 'steinum-sport-clothes' ); ?></label></th>
+						<td>
+							<input type="email" id="ssc_test_admin_email" name="ssc_test_admin_email" value="<?php echo esc_attr( $test_admin ); ?>" class="regular-text" />
+							<p class="description"><?php esc_html_e( 'Móttakari av admin-tilkunnini (við Excel).', 'steinum-sport-clothes' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="ssc_test_contact_email"><?php esc_html_e( 'Tann ið sendur ordran', 'steinum-sport-clothes' ); ?></label></th>
+						<td>
+							<input type="email" id="ssc_test_contact_email" name="ssc_test_contact_email" value="<?php echo esc_attr( $wp_admin_mail ); ?>" class="regular-text" />
+							<p class="description"><?php esc_html_e( 'Kontaktpersóns teldupost — har sendist PDF-kvittan.', 'steinum-sport-clothes' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="ssc_test_billing_email"><?php esc_html_e( 'Tann ið skal gjalda ordran', 'steinum-sport-clothes' ); ?></label></th>
+						<td>
+							<input type="email" id="ssc_test_billing_email" name="ssc_test_billing_email" value="<?php echo esc_attr( $wp_admin_mail ); ?>" class="regular-text" />
+							<p class="description"><?php esc_html_e( 'Rokning / fakturering — bert í tilkunnarinnihaldinum (einki særskilt teldupost til hetta í royndini).', 'steinum-sport-clothes' ); ?></p>
+						</td>
+					</tr>
+				</table>
 				<?php submit_button( __( 'Send royndar-tilkunn', 'steinum-sport-clothes' ), 'secondary', 'submit', false ); ?>
 			</form>
 
@@ -170,12 +194,26 @@ class SSC_Settings {
 		}
 		check_admin_referer( 'ssc_send_test' );
 
-		$email = isset( $_POST['test_email'] )
-			? sanitize_email( wp_unslash( (string) $_POST['test_email'] ) )
-			: '';
+		$opts       = self::current();
+		$fallback   = (string) get_option( 'admin_email', '' );
+		$def_admin  = (string) ( $opts['admin_to'] ?: $fallback );
 
-		$data = SSC_Form::sample_data( $email );
-		$ok   = ( new SSC_Submission() )->handle( $data );
+		$admin_in   = isset( $_POST['ssc_test_admin_email'] ) ? sanitize_email( wp_unslash( (string) $_POST['ssc_test_admin_email'] ) ) : '';
+		$contact_in = isset( $_POST['ssc_test_contact_email'] ) ? sanitize_email( wp_unslash( (string) $_POST['ssc_test_contact_email'] ) ) : '';
+		$billing_in = isset( $_POST['ssc_test_billing_email'] ) ? sanitize_email( wp_unslash( (string) $_POST['ssc_test_billing_email'] ) ) : '';
+
+		$admin   = ( '' !== $admin_in && false !== filter_var( $admin_in, FILTER_VALIDATE_EMAIL ) ) ? $admin_in : $def_admin;
+		$contact = ( '' !== $contact_in && false !== filter_var( $contact_in, FILTER_VALIDATE_EMAIL ) ) ? $contact_in : $fallback;
+		$billing = ( '' !== $billing_in && false !== filter_var( $billing_in, FILTER_VALIDATE_EMAIL ) ) ? $billing_in : $fallback;
+
+		$data = SSC_Form::sample_data(
+			'',
+			array(
+				'contact_email' => $contact,
+				'billing_email' => $billing,
+			)
+		);
+		$ok   = ( new SSC_Submission() )->handle( $data, $admin );
 
 		wp_safe_redirect(
 			add_query_arg(

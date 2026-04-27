@@ -18,15 +18,20 @@ class SSC_Submission {
 	 * Process an already-sanitized submission.
 	 *
 	 * @param array<string, string|int> $data Sanitized form data.
+	 * @param string|null               $override_admin_to Optional recipient for admin tilkunn (e.g. royndar-tilkunn).
 	 * @return bool True if at least the admin email was queued / dry-run accepted.
 	 */
-	public function handle( array $data ): bool {
+	public function handle( array $data, ?string $override_admin_to = null ): bool {
 		$labels    = SSC_Sanitizer::labels();
 		$site_name = (string) get_option( 'blogname', '' );
 
 		$settings = SSC_Settings::current();
 
-		$admin_to       = $settings['admin_to'];
+		$admin_to = $settings['admin_to'];
+		if ( is_string( $override_admin_to ) && '' !== trim( $override_admin_to )
+			&& false !== filter_var( $override_admin_to, FILTER_VALIDATE_EMAIL ) ) {
+			$admin_to = $override_admin_to;
+		}
 		$boat_name      = (string) ( $data['boat_name'] ?? '' );
 		$admin_subject  = self::interpolate( $settings['admin_subject'], $site_name, (string) $data['club_name'], $boat_name );
 		$admin_body     = SSC_Email_Builder::admin_body( $data, $labels, $site_name );

@@ -61,15 +61,29 @@ class SSC_Form {
 	}
 
 	/**
-	 * Sample submission for admin "Send royndar-tilkunn".
+	 * Sample submission for admin "Send royndar-tilkunn" and tests.
 	 *
+	 * @param string $billing_email Legacy: used when `$email_overrides` has no `billing_email`.
+	 * @param array<string, string> $email_overrides Optional `contact_email`, `billing_email` (valid addresses only).
 	 * @return array<string, mixed>
 	 */
-	public static function sample_data( string $billing_email = '' ): array {
-		if ( '' === $billing_email || ! filter_var( $billing_email, FILTER_VALIDATE_EMAIL ) ) {
-			$billing_email = (string) get_option( 'admin_email', 'test@example.com' );
+	public static function sample_data( string $billing_email = '', array $email_overrides = array() ): array {
+		$default_mail = (string) get_option( 'admin_email', 'test@example.com' );
+
+		$billing = $billing_email;
+		if ( isset( $email_overrides['billing_email'] ) && '' !== $email_overrides['billing_email']
+			&& false !== filter_var( $email_overrides['billing_email'], FILTER_VALIDATE_EMAIL ) ) {
+			$billing = (string) $email_overrides['billing_email'];
+		} elseif ( '' === $billing || ! filter_var( $billing, FILTER_VALIDATE_EMAIL ) ) {
+			$billing = $default_mail;
 		}
+
 		$contact = 'hans@example.com';
+		if ( isset( $email_overrides['contact_email'] ) && '' !== $email_overrides['contact_email']
+			&& false !== filter_var( $email_overrides['contact_email'], FILTER_VALIDATE_EMAIL ) ) {
+			$contact = (string) $email_overrides['contact_email'];
+		}
+
 		return array(
 			'club_name'     => 'Kappróðrarfelag Havnar',
 			'boat_name'     => 'Selin (royndarbátur)',
@@ -100,7 +114,7 @@ class SSC_Form {
 			'contact_name'  => 'Hans Hansen (royndarprógv)',
 			'contact_email' => $contact,
 			'phone'         => '+298 12 34 56',
-			'billing_email' => $billing_email,
+			'billing_email' => $billing,
 		);
 	}
 
