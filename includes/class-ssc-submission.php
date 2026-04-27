@@ -84,14 +84,36 @@ class SSC_Submission {
 		// Same inbox already gets the admin mail (full detail + attachments); skip duplicate kvittan.
 		$receipt_redundant = '' !== $admin_to_norm && $admin_to_norm === $customer_norm;
 
+		$sent_billing_receipt = false;
 		if ( $settings['receipt_enabled'] && '' !== $customer_to && ! $receipt_redundant ) {
-			SSC_Mail::send(
+			$sent_billing_receipt = SSC_Mail::send(
 				$customer_to,
 				$customer_subj,
 				$customer_body,
 				$headers,
 				$pdf_path ? array( $pdf_path ) : array(),
 				SSC_Mail::TYPE_RECEIPT
+			);
+		}
+
+		$contact_to    = strtolower( trim( (string) ( $data['contact_email'] ?? '' ) ) );
+		$contact_email = (string) ( $data['contact_email'] ?? '' );
+		$contact_ok    = '' !== $contact_to && false !== filter_var( $contact_email, FILTER_VALIDATE_EMAIL );
+		$contact_dup_admin = '' !== $admin_to_norm && $admin_to_norm === $contact_to;
+		$contact_dup_bill  = $sent_billing_receipt && $contact_to === $customer_norm;
+		if (
+			! empty( $settings['contact_receipt_enabled'] )
+			&& $contact_ok
+			&& ! $contact_dup_admin
+			&& ! $contact_dup_bill
+		) {
+			SSC_Mail::send(
+				$contact_email,
+				$customer_subj,
+				$customer_body,
+				$headers,
+				$pdf_path ? array( $pdf_path ) : array(),
+				SSC_Mail::TYPE_CONTACT_RECEIPT
 			);
 		}
 

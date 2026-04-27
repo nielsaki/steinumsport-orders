@@ -20,8 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class SSC_Mail {
 
-	public const TYPE_ADMIN   = 'Admin tilkunn';
-	public const TYPE_RECEIPT = 'Kvittan';
+	public const TYPE_ADMIN            = 'Admin tilkunn';
+	public const TYPE_RECEIPT          = 'Kvittan';
+	public const TYPE_CONTACT_RECEIPT  = 'Kvittan (kontakt)';
 
 	public static function is_test_mode(): bool {
 		return defined( 'SSC_EMAIL_TEST_MODE' ) && (bool) SSC_EMAIL_TEST_MODE;
