@@ -42,6 +42,7 @@ class SSC_Admin_List_Table extends WP_List_Table {
 			'contact_name'  => 'Kontakt',
 			'billing_email' => 'Teldupostur',
 			'pdf'           => 'PDF',
+			'excel'         => 'Excel',
 			'status'        => 'Støða',
 		);
 	}
@@ -133,19 +134,6 @@ class SSC_Admin_List_Table extends WP_List_Table {
 			case 'people':
 				$tot = SSC_Store::total_qty_from_row( $item );
 				return (string) (int) $tot;
-			case 'pdf':
-				$u = SSC_Store::admin_pdf_url( (int) $item['id'] );
-				if ( '' === $u ) {
-					return '<span class="na" style="color:#a7a7a7">—</span>';
-				}
-				return '<a class="button button-small" href="' . esc_url( $u ) . '" target="_blank" rel="noopener">'
-					. esc_html__( 'Sí', 'steinum-sport-clothes' ) . '</a>';
-			case 'status':
-				$labels = SSC_Store::statuses();
-				$key    = (string) $item['status'];
-				return '<span class="ssc-status ssc-status--' . esc_attr( $key ) . '">'
-					. esc_html( $labels[ $key ] ?? $key )
-					. '</span>';
 			default:
 				return isset( $item[ $col ] ) ? esc_html( (string) $item[ $col ] ) : '';
 		}
@@ -154,5 +142,54 @@ class SSC_Admin_List_Table extends WP_List_Table {
 	/** @param array<string, mixed> $item */
 	protected function column_cb( $item ) {
 		return sprintf( '<input type="checkbox" name="ids[]" value="%d" />', (int) $item['id'] );
+	}
+
+	/** @param array<string, mixed> $item */
+	protected function column_pdf( $item ) {
+		$u = SSC_Store::admin_pdf_url( (int) $item['id'] );
+		if ( '' === $u ) {
+			return '<span class="na" style="color:#a7a7a7">—</span>';
+		}
+		return '<a class="button button-small" href="' . esc_url( $u ) . '" target="_blank" rel="noopener">'
+			. esc_html__( 'Sí', 'steinum-sport-clothes' ) . '</a>';
+	}
+
+	/** @param array<string, mixed> $item */
+	protected function column_excel( $item ) {
+		$u = SSC_Store::admin_excel_url( (int) $item['id'] );
+		if ( '' === $u ) {
+			return '<span class="na" style="color:#a7a7a7">—</span>';
+		}
+		return '<a class="button button-small" href="' . esc_url( $u ) . '">'
+			. esc_html__( 'Sí', 'steinum-sport-clothes' ) . '</a>';
+	}
+
+	/** @param array<string, mixed> $item */
+	protected function column_status( $item ) {
+		$id     = (int) $item['id'];
+		$cur    = (string) $item['status'];
+		$labels = SSC_Store::statuses();
+		$sel_id = 'ssc-status-' . (string) $id;
+		ob_start();
+		?>
+		<label class="screen-reader-text" for="<?php echo esc_attr( $sel_id ); ?>"><?php esc_html_e( 'Støða', 'steinum-sport-clothes' ); ?></label>
+		<select id="<?php echo esc_attr( $sel_id ); ?>" class="ssc-status-select ssc-status-select--<?php echo esc_attr( $cur ); ?>" onchange="if(this.value){window.location.href=this.value;}">
+			<?php foreach ( $labels as $k => $lab ) : ?>
+				<?php
+				$url = add_query_arg(
+					array(
+						'action'   => 'ssc_quick_status',
+						'id'       => $id,
+						'status'   => $k,
+						'_wpnonce' => wp_create_nonce( 'ssc_quick_status_' . $id ),
+					),
+					admin_url( 'admin-post.php' )
+				);
+				?>
+				<option value="<?php echo esc_attr( $url ); ?>" <?php selected( $cur, $k ); ?>><?php echo esc_html( $lab ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+		return (string) ob_get_clean();
 	}
 }

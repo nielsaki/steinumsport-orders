@@ -312,6 +312,31 @@ class SSC_Store {
 		return is_array( $row ) ? $row : null;
 	}
 
+	/**
+	 * Rebuild submission-shaped data from a DB row (for regenerating exports).
+	 *
+	 * @param array<string, mixed> $row Row from self::find / list queries.
+	 * @return array<string, mixed>
+	 */
+	public static function row_to_order_data( array $row ): array {
+		$lines = array();
+		if ( ! empty( $row['lines_json'] ) ) {
+			$dec = json_decode( (string) $row['lines_json'], true );
+			if ( is_array( $dec ) ) {
+				$lines = $dec;
+			}
+		}
+		return array(
+			'club_name'     => (string) ( $row['club_name'] ?? '' ),
+			'boat_name'     => (string) ( $row['boat_name'] ?? '' ),
+			'contact_name'  => (string) ( $row['contact_name'] ?? '' ),
+			'contact_email' => (string) ( $row['contact_email'] ?? '' ),
+			'phone'         => (string) ( $row['phone'] ?? '' ),
+			'billing_email' => (string) ( $row['billing_email'] ?? '' ),
+			'order_lines'   => $lines,
+		);
+	}
+
 	public static function set_status( int $id, string $status, ?string $note = null ): bool {
 		if ( ! array_key_exists( $status, self::statuses() ) ) {
 			return false;
@@ -427,6 +452,68 @@ class SSC_Store {
 			),
 			admin_url( 'admin-post.php' )
 		);
+	}
+
+	/**
+	 * Admin URL to download a regenerated Excel file for a submission.
+	 */
+	public static function admin_excel_url( int $id ): string {
+		if ( $id < 1 || ! function_exists( 'admin_url' ) || ! function_exists( 'add_query_arg' ) || ! function_exists( 'wp_create_nonce' ) ) {
+			return '';
+		}
+		$row = self::find( $id );
+		if ( ! is_array( $row ) ) {
+			return '';
+		}
+		return (string) add_query_arg(
+			array(
+				'action'   => 'ssc_view_excel',
+				'id'       => $id,
+				'_wpnonce' => wp_create_nonce( 'ssc_view_excel_' . $id ),
+			),
+			admin_url( 'admin-post.php' )
+		);
+	}
+
+	/**
+	 * Generate Excel from stored row, stream it, and remove the temp file. Caller should exit.
+	 */
+	public static function output_excel_for_submission( int $id ): bool {
+		if ( ! class_exists( 'SSC_Order_Excel' ) ) {
+			return false;
+		}
+		$row = self::find( $id );
+		if ( ! is_array( $row ) ) {
+			return false;
+		}
+		$data = self::row_to_order_data( $row );
+		$path = SSC_Order_Excel::write_file( $data );
+		if ( '' === $path || ! is_file( $path ) || ! is_readable( $path ) ) {
+			return false;
+		}
+		if ( ! self::pdf_path_is_servable( $path ) ) {
+			@unlink( $path );
+			return false;
+		}
+		$ext = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+		$ctype = 'xlsx' === $ext
+			? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+			: 'application/xml';
+		$size = (int) @filesize( $path );
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: ' . $ctype );
+			header( 'Content-Disposition: attachment; filename="steinum-order-' . $id . '.' . $ext . '"' );
+			if ( $size > 0 ) {
+				header( 'Content-Length: ' . (string) $size );
+			}
+			if ( function_exists( 'nocache_headers' ) ) {
+				nocache_headers();
+			}
+		}
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		readfile( $path );
+		@unlink( $path );
+		return true;
 	}
 
 	/** @param array<int, int> $ids */

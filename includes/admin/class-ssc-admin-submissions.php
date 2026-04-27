@@ -19,10 +19,61 @@ class SSC_Admin_Submissions {
 	public const NONCE_NAME    = 'ssc_nonce';
 
 	public function register(): void {
+		add_action( 'admin_init', array( $this, 'maybe_handle_list_bulk_delete' ), 1 );
 		add_action( 'admin_post_ssc_submission_action', array( $this, 'handle_action' ) );
 		add_action( 'admin_post_ssc_purge', array( $this, 'handle_purge' ) );
 		add_action( 'admin_post_ssc_view_pdf', array( $this, 'handle_view_pdf' ) );
+		add_action( 'admin_post_ssc_view_excel', array( $this, 'handle_view_excel' ) );
+		add_action( 'admin_post_ssc_quick_status', array( $this, 'handle_quick_status' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
+	}
+
+	/**
+	 * Bulk delete must POST to admin.php so WP_List_Table's `action` / `action2` fields are not
+	 * overwritten by admin-post.php's required `action` parameter.
+	 */
+	public function maybe_handle_list_bulk_delete(): void {
+		if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( empty( $_POST[ self::NONCE_NAME ] ) || empty( $_POST['page'] ) || self::PAGE !== (string) wp_unslash( $_POST['page'] ) ) {
+			return;
+		}
+		check_admin_referer( self::NONCE_ACTION, self::NONCE_NAME );
+
+		$action  = isset( $_POST['action'] ) ? (string) wp_unslash( $_POST['action'] ) : '-1';
+		$action2 = isset( $_POST['action2'] ) ? (string) wp_unslash( $_POST['action2'] ) : '-1';
+		$bulk    = ( '-1' !== $action ) ? $action : $action2;
+		if ( 'delete' !== $bulk ) {
+			return;
+		}
+
+		$ids = isset( $_POST['ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['ids'] ) ) : array();
+		$ids = array_values( array_filter( $ids ) );
+		if ( ! $ids ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'    => self::PAGE,
+						'ssc_msg' => 'no_selection',
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		SSC_Store::delete_many( $ids );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'    => self::PAGE,
+					'ssc_msg' => 'bulk_deleted',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	public function enqueue_admin_styles( string $hook ): void {
@@ -69,9 +120,8 @@ class SSC_Admin_Submissions {
 				</p>
 			</form>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="ssc_submission_action" />
-				<input type="hidden" name="op" value="bulk_delete" />
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
+				<input type="hidden" name="page" value="<?php echo esc_attr( self::PAGE ); ?>" />
 				<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME ); ?>
 				<?php $table->display(); ?>
 			</form>
@@ -117,6 +167,14 @@ class SSC_Admin_Submissions {
 						' <a href="%s" class="page-title-action" target="_blank" rel="noopener">%s</a>',
 						esc_url( $pdf_u ),
 						esc_html__( 'Sí PDF', 'steinum-sport-clothes' )
+					);
+				}
+				$xls_u = SSC_Store::admin_excel_url( (int) $row['id'] );
+				if ( '' !== $xls_u ) {
+					printf(
+						' <a href="%s" class="page-title-action">%s</a>',
+						esc_url( $xls_u ),
+						esc_html__( 'Sí Excel', 'steinum-sport-clothes' )
 					);
 				}
 				?>
@@ -286,6 +344,45 @@ class SSC_Admin_Submissions {
 		wp_die( esc_html__( 'PDF ikki funnin ella værdur ikki læstur.', 'steinum-sport-clothes' ) );
 	}
 
+	public function handle_quick_status(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Ikki loyvi.', 'steinum-sport-clothes' ) );
+		}
+		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+		if ( $id < 1 || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) ), 'ssc_quick_status_' . $id ) ) {
+			wp_die( esc_html__( 'Ógyldugt ummæli.', 'steinum-sport-clothes' ) );
+		}
+		$status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( (string) $_GET['status'] ) ) : '';
+		if ( SSC_Store::set_status( $id, $status, null ) ) {
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'    => self::PAGE,
+						'ssc_msg' => 'status_updated',
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=' . self::PAGE ) );
+		exit;
+	}
+
+	public function handle_view_excel(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Ikki loyvi.', 'steinum-sport-clothes' ) );
+		}
+		$id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+		if ( $id < 1 || ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) ), 'ssc_view_excel_' . $id ) ) {
+			wp_die( esc_html__( 'Ógyldugt ummæli.', 'steinum-sport-clothes' ) );
+		}
+		if ( SSC_Store::output_excel_for_submission( $id ) ) {
+			exit;
+		}
+		wp_die( esc_html__( 'Excel ikki stovnað.', 'steinum-sport-clothes' ) );
+	}
+
 	public function handle_purge(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( 'Ikki loyvi.' );
@@ -312,10 +409,12 @@ class SSC_Admin_Submissions {
 		}
 		$msg = (string) $_GET['ssc_msg'];
 		$map = array(
-			'updated'      => array( 'success', 'Fráboðan dagført.' ),
-			'deleted'      => array( 'success', 'Fráboðan strikað.' ),
-			'bulk_deleted' => array( 'success', 'Fráboðanir strikaðar.' ),
-			'purged'       => array( 'success', sprintf( 'Strikaðar: %d.', (int) ( $_GET['n'] ?? 0 ) ) ),
+			'updated'        => array( 'success', 'Fráboðan dagført.' ),
+			'status_updated' => array( 'success', 'Støða dagført.' ),
+			'deleted'        => array( 'success', 'Fráboðan strikað.' ),
+			'bulk_deleted'   => array( 'success', 'Fráboðanir strikaðar.' ),
+			'no_selection'   => array( 'warning', 'Vel minst eina røð til strikan.' ),
+			'purged'         => array( 'success', sprintf( 'Strikaðar: %d.', (int) ( $_GET['n'] ?? 0 ) ) ),
 		);
 		if ( ! isset( $map[ $msg ] ) ) {
 			return;

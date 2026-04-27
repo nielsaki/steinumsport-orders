@@ -13,6 +13,22 @@
 .ssc-status--delivered  { background: #d4edda; color: #155724; }
 .ssc-status--cancelled  { background: #f8d7da; color: #721c24; }
 
+.ssc-status-select {
+	max-width: 11em;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	padding: 2px 6px;
+	border-radius: 6px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+.ssc-status-select.ssc-status-select--received   { background: #fff8e5; border-color: #e6d4a8; color: #856404; }
+.ssc-status-select.ssc-status-select--processing { background: #e8f6f9; border-color: #9ccbd4; color: #0c5460; }
+.ssc-status-select.ssc-status-select--delivered  { background: #e8f5e9; border-color: #a3d4a8; color: #155724; }
+.ssc-status-select.ssc-status-select--cancelled  { background: #fdecea; border-color: #e0a8ad; color: #721c24; }
+
 .ssc-detail-grid pre {
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size: 13px;
