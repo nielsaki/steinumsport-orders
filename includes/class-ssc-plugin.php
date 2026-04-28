@@ -40,6 +40,39 @@ class SSC_Plugin {
 		SSC_Store::maybe_install();
 	}
 
+	/**
+	 * Submenu rows under Steinum Sport. Add entries here instead of duplicate add_submenu_page calls.
+	 *
+	 * Each entry: page_title (string), menu_title (string), slug (hook suffix), capability (string), callback (callable).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function admin_submenus(): array {
+		$items = array(
+			array(
+				'page_title' => __( 'Fráboðanir', 'steinum-sport-clothes' ),
+				'menu_title' => __( 'Fráboðanir', 'steinum-sport-clothes' ),
+				'slug'       => SSC_Admin_Submissions::PAGE,
+				'capability' => 'manage_options',
+				'callback'   => array( $this->admin_submissions, 'render_page' ),
+			),
+			array(
+				'page_title' => __( 'Stillingar', 'steinum-sport-clothes' ),
+				'menu_title' => __( 'Stillingar', 'steinum-sport-clothes' ),
+				'slug'       => SSC_Settings::PAGE,
+				'capability' => 'manage_options',
+				'callback'   => array( $this->settings, 'render_page' ),
+			),
+		);
+
+		/**
+		 * Submenus under Steinum Sport (below the top-level item).
+		 *
+		 * @param array<int, array<string, mixed>> $items
+		 */
+		return apply_filters( 'ssc_admin_submenus', $items );
+	}
+
 	public function register_menu(): void {
 		add_menu_page(
 			__( 'Steinum Sport', 'steinum-sport-clothes' ),
@@ -51,22 +84,15 @@ class SSC_Plugin {
 			26
 		);
 
-		add_submenu_page(
-			SSC_Admin_Submissions::PAGE,
-			__( 'Fráboðanir', 'steinum-sport-clothes' ),
-			__( 'Fráboðanir', 'steinum-sport-clothes' ),
-			'manage_options',
-			SSC_Admin_Submissions::PAGE,
-			array( $this->admin_submissions, 'render_page' )
-		);
-
-		add_submenu_page(
-			SSC_Admin_Submissions::PAGE,
-			__( 'Stillingar', 'steinum-sport-clothes' ),
-			__( 'Stillingar', 'steinum-sport-clothes' ),
-			'manage_options',
-			SSC_Settings::PAGE,
-			array( $this->settings, 'render_page' )
-		);
+		foreach ( $this->admin_submenus() as $row ) {
+			add_submenu_page(
+				SSC_Admin_Submissions::PAGE,
+				(string) $row['page_title'],
+				(string) $row['menu_title'],
+				isset( $row['capability'] ) ? (string) $row['capability'] : 'manage_options',
+				(string) $row['slug'],
+				$row['callback']
+			);
+		}
 	}
 }
