@@ -1,6 +1,6 @@
 <?php
 /**
- * Steinum Sport → Bíleggingar sløg admin screen.
+ * Steinum Sport → Items admin screen (order-line catalog).
  *
  * @package Steinum_Sport_Clothes
  */
@@ -29,7 +29,7 @@ class SSC_Admin_Order_Items {
 		$saved   = isset( $_GET['ssc_items_saved'] ) ? (string) sanitize_text_field( wp_unslash( (string) $_GET['ssc_items_saved'] ) ) : '';
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Steinum Sport — bíleggingar sløg', 'steinum-sport-clothes' ); ?></h1>
+			<h1><?php esc_html_e( 'Steinum Sport — Items', 'steinum-sport-clothes' ); ?></h1>
 			<p class="description">
 				<?php esc_html_e( 'Áset sløg í fall-listan í skrásetingarformularinum. Burknapunkt merkir hvørji felt kundi skal vita (kyn, støð, farv …).', 'steinum-sport-clothes' ); ?>
 			</p>
