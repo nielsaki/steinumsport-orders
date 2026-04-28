@@ -66,6 +66,25 @@ class SSC_Plugin {
 				'capability' => 'manage_options',
 				'callback'   => array( $this->settings, 'render_page' ),
 			),
+		);
+
+		/**
+		 * Submenus under Steinum Sport (below the top-level item).
+		 *
+		 * @param array<int, array<string, mixed>> $items
+		 */
+		return apply_filters( 'ssc_admin_submenus', $items );
+	}
+
+	/**
+	 * Screens nested under Steinum Sport → Stillingar (third admin level).
+	 *
+	 * Parents use `SSC_Settings::PAGE` so these appear under Stillingar, not as siblings of Fráboðanir.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function admin_submenus_under_settings(): array {
+		$items = array(
 			array(
 				'page_title' => __( 'Bíleggingar sløg', 'steinum-sport-clothes' ),
 				'menu_title' => __( 'Bíleggingar sløg', 'steinum-sport-clothes' ),
@@ -76,11 +95,11 @@ class SSC_Plugin {
 		);
 
 		/**
-		 * Submenus under Steinum Sport (below the top-level item).
+		 * Submenus registered under Steinum Sport → Stillingar.
 		 *
-		 * @param array<int, array<string, mixed>> $items
+		 * @param array<int, array<string, mixed>> $items Each item same shape as {@see SSC_Plugin::admin_submenus()}.
 		 */
-		return apply_filters( 'ssc_admin_submenus', $items );
+		return apply_filters( 'ssc_admin_submenus_under_settings', $items );
 	}
 
 	public function register_menu(): void {
@@ -97,6 +116,17 @@ class SSC_Plugin {
 		foreach ( $this->admin_submenus() as $row ) {
 			add_submenu_page(
 				SSC_Admin_Submissions::PAGE,
+				(string) $row['page_title'],
+				(string) $row['menu_title'],
+				isset( $row['capability'] ) ? (string) $row['capability'] : 'manage_options',
+				(string) $row['slug'],
+				$row['callback']
+			);
+		}
+
+		foreach ( $this->admin_submenus_under_settings() as $row ) {
+			add_submenu_page(
+				SSC_Settings::PAGE,
 				(string) $row['page_title'],
 				(string) $row['menu_title'],
 				isset( $row['capability'] ) ? (string) $row['capability'] : 'manage_options',
