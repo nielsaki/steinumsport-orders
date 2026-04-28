@@ -271,7 +271,7 @@ class SSC_Form {
 
 		$has_item    = ( $item !== '' && array_key_exists( $item, $items ) );
 		$show_remove = $line_count > 1;
-		$show_g      = $has_item && SSC_Sanitizer::ITEM_TRIKOT === $item;
+		$show_g      = $has_item && SSC_Sanitizer::item_needs_gender( $item );
 		$show_sz  = $has_item && SSC_Sanitizer::item_needs_size( $item );
 		$show_sp  = $has_item && SSC_Sanitizer::item_uses_farv( $item );
 		$show_nm  = $has_item && ! $show_sp;
@@ -488,11 +488,15 @@ class SSC_Form {
 			'ajaxUrl' => function_exists( 'admin_url' ) ? admin_url( 'admin-ajax.php' ) : '',
 			'action'  => self::AJAX_FRESH_NONCE,
 		);
-		$ajax_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $ajax_cfg ) : (string) json_encode( $ajax_cfg );
+		$ajax_json  = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $ajax_cfg ) : (string) json_encode( $ajax_cfg );
+		$item_rules = class_exists( 'SSC_Order_Items' ) ? SSC_Order_Items::frontend_rules_map() : array();
+		$rules_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $item_rules ) : (string) json_encode( $item_rules );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
 		echo '<script>window.sscLinesL10n=' . $l10n_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
 		echo '<script>window.sscFormAjax=' . $ajax_json . ";</script>\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON built from SSC_Order_Items catalog.
+		echo '<script>window.sscItemRules=' . $rules_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static asset from disk, not user input.
 		echo '<script id="ssc-order-lines-js">' . $js . "</script>\n";
 	}

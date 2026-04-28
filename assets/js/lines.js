@@ -11,16 +11,13 @@
 	}
 	window.__sscOrderLinesInit = true;
 
-	var ITEMS = {
-		TRIKOT: 'trikot',
-		TSHIRT: 'tshirt',
-		RASH: 'rashguard',
-		SPEED: 'speedcoach',
-		NK: 'nk_stopur',
-	};
-
-	function isFarvType(item) {
-		return item === ITEMS.SPEED || item === ITEMS.NK;
+	function itemTraits(it) {
+		var R = window.sscItemRules || {};
+		var row = R[it];
+		if (row && (row.g !== undefined || row.s !== undefined || row.f !== undefined)) {
+			return { g: !!row.g, s: !!row.s, f: !!row.f };
+		}
+		return { g: false, s: false, f: false };
 	}
 
 	function rowsContainer() {
@@ -76,9 +73,10 @@
 		var qtyIn = row.querySelector('.ssc-line-qty');
 		var qtyLab = row.querySelector('.ssc-qty-label');
 
-		var isTrikot = item === ITEMS.TRIKOT;
-		var isClothSize = isTrikot || item === ITEMS.TSHIRT || item === ITEMS.RASH;
-		var isFarv = isFarvType(item);
+		var tr = itemTraits(item);
+		var needsGenderUi = !!tr.g;
+		var isClothSize = !!tr.s;
+		var isFarv = !!tr.f;
 		var hasItem = item.length > 0;
 
 		var c = rowsContainer();
@@ -90,7 +88,7 @@
 		}
 		setLinePartHidden(action, nRows < 2);
 
-		setLinePartHidden(g, !isTrikot);
+		setLinePartHidden(g, !needsGenderUi);
 		setLinePartHidden(sz, !isClothSize);
 		setLinePartHidden(sp, !isFarv);
 		setLinePartHidden(nm, !hasItem || isFarv);
@@ -102,7 +100,7 @@
 		}
 		var gEl = row.querySelector('.ssc-line-gender');
 		if (gEl) {
-			if (isTrikot) {
+			if (needsGenderUi) {
 				gEl.disabled = false;
 				gEl.setAttribute('required', 'required');
 			} else {

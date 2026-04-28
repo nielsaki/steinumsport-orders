@@ -28,13 +28,17 @@ class SSC_Sanitizer {
 
 	/** @return array<string, string> item_id => display label */
 	public static function item_types(): array {
-		$base = array(
-			self::ITEM_TRIKOT     => 'Trikot',
-			self::ITEM_TSHIRT     => 'T-shirt',
-			self::ITEM_RASHGUARD  => 'Rashguard',
-			self::ITEM_SPEEDCOACH => 'SpeedCoach',
-			self::ITEM_NK_STOPUR  => 'NK Stopur',
-		);
+		if ( class_exists( 'SSC_Order_Items' ) ) {
+			$base = SSC_Order_Items::labels_map();
+		} else {
+			$base = array(
+				self::ITEM_TRIKOT     => 'Trikot',
+				self::ITEM_TSHIRT     => 'T-shirt',
+				self::ITEM_RASHGUARD  => 'Rashguard',
+				self::ITEM_SPEEDCOACH => 'SpeedCoach',
+				self::ITEM_NK_STOPUR  => 'NK Stopur',
+			);
+		}
 		if ( function_exists( 'apply_filters' ) ) {
 			/** @var array<string, string> $out */
 			$out = apply_filters( 'ssc_item_types', $base );
@@ -76,22 +80,26 @@ class SSC_Sanitizer {
 		return $base;
 	}
 
-	/** T-shirt, rashguard, trikot. */
 	public static function item_needs_size( string $item ): bool {
-		return in_array( $item, array( self::ITEM_TRIKOT, self::ITEM_TSHIRT, self::ITEM_RASHGUARD ), true );
+		return class_exists( 'SSC_Order_Items' )
+			? SSC_Order_Items::item_needs_size( $item )
+			: in_array( $item, array( self::ITEM_TRIKOT, self::ITEM_TSHIRT, self::ITEM_RASHGUARD ), true );
 	}
 
 	public static function item_needs_gender( string $item ): bool {
-		return self::ITEM_TRIKOT === $item;
+		return class_exists( 'SSC_Order_Items' )
+			? SSC_Order_Items::item_needs_gender( $item )
+			: ( self::ITEM_TRIKOT === $item );
 	}
 
 	public static function item_is_speedcoach( string $item ): bool {
 		return self::ITEM_SPEEDCOACH === $item;
 	}
 
-	/** SpeedCoach og NK Stopur: ynskt farv + nøgd (eingin navn/stødd). */
 	public static function item_uses_farv( string $item ): bool {
-		return in_array( $item, array( self::ITEM_SPEEDCOACH, self::ITEM_NK_STOPUR ), true );
+		return class_exists( 'SSC_Order_Items' )
+			? SSC_Order_Items::item_uses_farv( $item )
+			: in_array( $item, array( self::ITEM_SPEEDCOACH, self::ITEM_NK_STOPUR ), true );
 	}
 
 	/** @return array<string, string> */

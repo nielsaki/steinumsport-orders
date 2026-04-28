@@ -17,11 +17,13 @@ class SSC_Plugin {
 	private SSC_Form $form;
 	private SSC_Settings $settings;
 	private SSC_Admin_Submissions $admin_submissions;
+	private SSC_Admin_Order_Items $admin_order_items;
 
 	public function __construct() {
-		$this->form              = new SSC_Form();
-		$this->settings          = new SSC_Settings();
-		$this->admin_submissions = new SSC_Admin_Submissions();
+		$this->form               = new SSC_Form();
+		$this->settings           = new SSC_Settings();
+		$this->admin_submissions  = new SSC_Admin_Submissions();
+		$this->admin_order_items  = new SSC_Admin_Order_Items();
 	}
 
 	public function register(): void {
@@ -32,6 +34,7 @@ class SSC_Plugin {
 		$this->form->register();
 		$this->settings->register();
 		$this->admin_submissions->register();
+		$this->admin_order_items->register();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 	}
@@ -62,6 +65,13 @@ class SSC_Plugin {
 				'slug'       => SSC_Settings::PAGE,
 				'capability' => 'manage_options',
 				'callback'   => array( $this->settings, 'render_page' ),
+			),
+			array(
+				'page_title' => __( 'Bíleggingar sløg', 'steinum-sport-clothes' ),
+				'menu_title' => __( 'Bíleggingar sløg', 'steinum-sport-clothes' ),
+				'slug'       => SSC_Admin_Order_Items::PAGE,
+				'capability' => 'manage_options',
+				'callback'   => array( $this->admin_order_items, 'render_page' ),
 			),
 		);
 
