@@ -31,7 +31,7 @@ class SSC_Admin_Order_Items {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Steinum Sport — Items', 'steinum-sport-clothes' ); ?></h1>
 			<p class="description">
-				<?php esc_html_e( 'Áset sløg í fall-listan í skrásetingarformularinum. Burknapunkt merkir hvørji felt kundi skal vita (kyn, støð, farv …).', 'steinum-sport-clothes' ); ?>
+				<?php esc_html_e( 'Skriv heiti fyri hvørt slag í fellivalinum. Vel við krossum um kyn, stødd og Farva skulu brúkast.', 'steinum-sport-clothes' ); ?>
 			</p>
 
 			<?php if ( '1' === $saved ) : ?>
@@ -47,11 +47,10 @@ class SSC_Admin_Order_Items {
 				<table class="widefat striped ssc-order-items-table" style="max-width:960px;">
 					<thead>
 						<tr>
-							<th scope="col"><?php esc_html_e( 'Burknapunkt (slug)', 'steinum-sport-clothes' ); ?></th>
-							<th scope="col"><?php esc_html_e( 'Heiti (víst)', 'steinum-sport-clothes' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Heiti (í formularinum)', 'steinum-sport-clothes' ); ?></th>
 							<th scope="col"><?php esc_html_e( 'Kyn', 'steinum-sport-clothes' ); ?></th>
 							<th scope="col"><?php esc_html_e( 'Stødd', 'steinum-sport-clothes' ); ?></th>
-							<th scope="col"><?php esc_html_e( 'Ynskt farv', 'steinum-sport-clothes' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Farva', 'steinum-sport-clothes' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="ssc-order-items-rows">
@@ -81,11 +80,23 @@ class SSC_Admin_Order_Items {
 				var tbody = document.getElementById('ssc-order-items-rows');
 				if (!btn || !tbody) return;
 				function nextIdx() {
-					var n = tbody.querySelectorAll('tr').length;
-					return n;
+					return tbody.querySelectorAll('.ssc-order-item-row').length;
+				}
+				var form = document.getElementById('ssc-order-items-form');
+				if (form) {
+					form.addEventListener('change', function (ev) {
+						var t = ev.target;
+						if (!t || !t.classList || !t.classList.contains('ssc-admin-needs-size')) {
+							return;
+						}
+						var pal = t.closest('td').querySelector('.ssc-admin-size-palette');
+						if (pal) {
+							pal.style.display = t.checked ? '' : 'none';
+						}
+					});
 				}
 				btn.addEventListener('click', function () {
-					var tr = tbody.querySelector('tr');
+					var tr = tbody.querySelector('.ssc-order-item-row');
 					if (!tr) return;
 					var ix = nextIdx();
 					var clone = tr.cloneNode(true);
@@ -94,10 +105,19 @@ class SSC_Admin_Order_Items {
 					for (k = 0; k < inp.length; k++) {
 						var nm = inp[k].name;
 						if (!nm || nm.indexOf('ssc_items') === -1) continue;
-						nm = nm.replace(/ssc_items\[\d]/, 'ssc_items[' + ix + ']');
+						nm = nm.replace(/ssc_items\[\d+\]/, 'ssc_items[' + ix + ']');
 						inp[k].name = nm;
-						if (inp[k].type === 'text') inp[k].value = '';
-						else if (inp[k].type === 'checkbox') inp[k].checked = false;
+						if (nm.indexOf('[stable_id]') > -1) {
+							inp[k].value = '';
+						} else if (inp[k].type === 'text') {
+							inp[k].value = '';
+						} else if (inp[k].type === 'checkbox') {
+							inp[k].checked = false;
+						}
+					}
+					var pal = clone.querySelector('.ssc-admin-size-palette');
+					if (pal) {
+						pal.style.display = 'none';
 					}
 					tbody.appendChild(clone);
 				});
@@ -108,7 +128,7 @@ class SSC_Admin_Order_Items {
 	}
 
 	/**
-	 * @param array{id: string, label: string, needs_gender: bool, needs_size: bool, uses_farv: bool} $row
+	 * @param array{id?: string, label?: string, needs_gender?: bool, needs_size?: bool, sizes?: list<string>|mixed, uses_farv?: bool} $row
 	 */
 	private static function render_row_inputs( int $i, array $row ): void {
 		$id   = (string) ( $row['id'] ?? '' );
@@ -116,13 +136,14 @@ class SSC_Admin_Order_Items {
 		$g    = ! empty( $row['needs_gender'] );
 		$s    = ! empty( $row['needs_size'] );
 		$f    = ! empty( $row['uses_farv'] );
+
+		$size_master = SSC_Sanitizer::size_options();
+		$picked_sizes = $s ? SSC_Order_Items::sizes_allowed_from_row( $row ) : array();
+
 		?>
 		<tr class="ssc-order-item-row">
 			<td>
-				<input type="text" name="ssc_items[<?php echo (int) $i; ?>][id]" value="<?php echo esc_attr( $id ); ?>"
-					class="regular-text code" autocomplete="off" />
-			</td>
-			<td>
+				<input type="hidden" name="ssc_items[<?php echo (int) $i; ?>][stable_id]" value="<?php echo esc_attr( $id ); ?>" />
 				<input type="text" name="ssc_items[<?php echo (int) $i; ?>][label]" value="<?php echo esc_attr( $lab ); ?>" class="regular-text" autocomplete="off" />
 			</td>
 			<td>
@@ -132,8 +153,20 @@ class SSC_Admin_Order_Items {
 			</td>
 			<td>
 				<label>
-					<input type="checkbox" name="ssc_items[<?php echo (int) $i; ?>][needs_size]" value="1" <?php checked( $s ); ?> />
+					<input type="checkbox" class="ssc-admin-needs-size" name="ssc_items[<?php echo (int) $i; ?>][needs_size]" value="1" <?php checked( $s ); ?> />
 				</label>
+				<div class="ssc-admin-size-palette" style="<?php echo $s ? '' : 'display:none;'; ?>">
+					<fieldset style="margin:0.65rem 0 0;padding:0.5rem;border:1px solid #c3c4c7;border-radius:4px;">
+						<legend style="padding:0 0.25rem;font-size:11px;"><?php esc_html_e( 'Giltugar støddir', 'steinum-sport-clothes' ); ?></legend>
+						<?php foreach ( $size_master as $zs ) : ?>
+							<label style="margin-right:10px;display:inline-flex;gap:4px;align-items:center;">
+								<input type="checkbox" name="ssc_items[<?php echo (int) $i; ?>][sizes][<?php echo esc_attr( $zs ); ?>]" value="1" <?php checked( in_array( $zs, $picked_sizes, true ) ); ?> />
+								<?php echo esc_html( $zs ); ?>
+							</label>
+						<?php endforeach; ?>
+					</fieldset>
+					<p class="description" style="margin:0.4rem 0 0;"><?php esc_html_e( 'Vel hvørji støddir kundan kann velja fyri hetta slagnum. Ómerkt = allir.', 'steinum-sport-clothes' ); ?></p>
+				</div>
 			</td>
 			<td>
 				<label>

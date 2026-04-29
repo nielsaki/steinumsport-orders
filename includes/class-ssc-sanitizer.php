@@ -150,8 +150,14 @@ class SSC_Sanitizer {
 				$item = '';
 			}
 
-			$size         = self::text( $row['size'] ?? '' );
-			$size         = in_array( $size, self::size_options(), true ) ? $size : '';
+			$size = self::text( $row['size'] ?? '' );
+			$allowed_sizes = self::size_options();
+			if ( class_exists( 'SSC_Order_Items' ) ) {
+				$allowed_sizes = '' !== $item
+					? SSC_Order_Items::sizes_for_item( $item )
+					: self::size_options();
+			}
+			$size = in_array( $size, $allowed_sizes, true ) ? $size : '';
 			$qty          = self::pos_int( $row['qty'] ?? 0 );
 			$name         = self::text( $row['name'] ?? '' );
 			$gender       = self::text( $row['gender'] ?? '' );
@@ -242,7 +248,11 @@ class SSC_Sanitizer {
 		if ( self::item_uses_farv( $item ) ) {
 			return in_array( $bumper, array_keys( self::farv_options() ), true );
 		}
-		if ( ! in_array( $size, self::size_options(), true ) ) {
+		$allowed_sizes = self::size_options();
+		if ( class_exists( 'SSC_Order_Items' ) ) {
+			$allowed_sizes = SSC_Order_Items::sizes_for_item( $item );
+		}
+		if ( ! in_array( $size, $allowed_sizes, true ) ) {
 			return false;
 		}
 		if ( self::item_needs_gender( $item ) ) {

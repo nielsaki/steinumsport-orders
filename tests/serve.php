@@ -353,10 +353,11 @@ $frontend_css = (string) @file_get_contents( dirname( __DIR__ ) . '/assets/css/f
 		.button.primary:hover, button.primary:hover, a.button.primary:hover { background: var(--ssc-accent-hi) !important; }
 		select { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; font-size: 0.8rem; }
 		.pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #e3e6ea; color: #2c3e50; }
-		.pill-received { background: #fff3cd; color: #856404; }
-		.pill-processing { background: #d1ecf1; color: #0c5460; }
-		.pill-delivered { background: #d4edda; color: #155724; }
-		.pill-cancelled { background: #f8d7da; color: #721c24; }
+		.pill-mottiki { background: #fff3cd; color: #856404; }
+		.pill-design_i_gerd { background: #dbeafe; color: #1e40af; }
+		.pill-bilagt { background: #e9d5ff; color: #5b21b6; }
+		.pill-fakturin_sendur { background: #ffedd5; color: #9a3412; }
+		.pill-avgreitt { background: #d4edda; color: #155724; }
 		/* Form: section inside .s-panel__body should not add double padding to .ssc-form */
 		.s-panel--form .s-panel__body .ssc-form { max-width: none; }
 		<?php echo $frontend_css; ?>

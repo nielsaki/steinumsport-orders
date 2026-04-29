@@ -8,10 +8,11 @@
 	color: #2c3e50;
 }
 
-.ssc-status--received   { background: #fff3cd; color: #856404; }
-.ssc-status--processing { background: #d1ecf1; color: #0c5460; }
-.ssc-status--delivered  { background: #d4edda; color: #155724; }
-.ssc-status--cancelled  { background: #f8d7da; color: #721c24; }
+.ssc-status--mottiki { background: #fff3cd; color: #856404; }
+.ssc-status--design_i_gerd { background: #dbeafe; color: #1e40af; }
+.ssc-status--bilagt { background: #e9d5ff; color: #5b21b6; }
+.ssc-status--fakturin_sendur { background: #ffedd5; color: #9a3412; }
+.ssc-status--avgreitt { background: #d4edda; color: #155724; }
 
 .ssc-status-select {
 	max-width: 11em;
@@ -24,10 +25,11 @@
 	background: #fff;
 }
 
-.ssc-status-select.ssc-status-select--received   { background: #fff8e5; border-color: #e6d4a8; color: #856404; }
-.ssc-status-select.ssc-status-select--processing { background: #e8f6f9; border-color: #9ccbd4; color: #0c5460; }
-.ssc-status-select.ssc-status-select--delivered  { background: #e8f5e9; border-color: #a3d4a8; color: #155724; }
-.ssc-status-select.ssc-status-select--cancelled  { background: #fdecea; border-color: #e0a8ad; color: #721c24; }
+.ssc-status-select.ssc-status-select--mottiki { background: #fff8e5; border-color: #e6d4a8; color: #856404; }
+.ssc-status-select.ssc-status-select--design_i_gerd { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+.ssc-status-select.ssc-status-select--bilagt { background: #faf5ff; border-color: #d8b4fe; color: #5b21b6; }
+.ssc-status-select.ssc-status-select--fakturin_sendur { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+.ssc-status-select.ssc-status-select--avgreitt { background: #e8f5e9; border-color: #a3d4a8; color: #155724; }
 
 .ssc-detail-grid pre {
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

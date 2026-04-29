@@ -197,7 +197,7 @@ class SSC_Admin_Submissions {
 											<?php
 											if ( $lines ) {
 												echo '<table class="widefat" style="margin:0;">';
-												echo '<thead><tr><th>#</th><th>Slag</th><th>Kyn</th><th>Stødd</th><th>Ynskt farv</th><th>Nøgd</th><th>Navn</th></tr></thead><tbody>';
+												echo '<thead><tr><th>#</th><th>Slag</th><th>Kyn</th><th>Stødd</th><th>Farva</th><th>Nøgd</th><th>Navn</th></tr></thead><tbody>';
 												$it = SSC_Sanitizer::item_types();
 												$gl = SSC_Sanitizer::gender_labels();
 												$fa = SSC_Sanitizer::farv_options();

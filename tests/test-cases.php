@@ -278,7 +278,7 @@ function ssc_test_store_insert_and_find(): void {
 	$row = SSC_Store::find( $id );
 	ssc_assert_true( is_array( $row ), 'find returns row' );
 	ssc_assert_eq( 'Kappróðrarfelag Havnar', $row['club_name'] );
-	ssc_assert_eq( 'received', $row['status'] );
+	ssc_assert_eq( 'mottiki', $row['status'] );
 	ssc_assert_eq( 'BODY', $row['email_body'] );
 	ssc_assert_eq( 'hans@example.com', (string) ( $row['contact_email'] ?? '' ) );
 }
@@ -291,8 +291,8 @@ function ssc_test_store_filter_by_status_and_search(): void {
 	$id2 = SSC_Store::insert( array_merge( SSC_Form::sample_data( 'c@d.co' ), array( 'club_name' => 'Tórshavn' ) ), '' );
 	SSC_Store::set_status( $id2, SSC_Store::STATUS_DELIVERED );
 
-	$res = SSC_Store::all( array( 'status' => 'received' ) );
-	ssc_assert_eq( 1, $res['total'], 'only received counted' );
+	$res = SSC_Store::all( array( 'status' => 'mottiki' ) );
+	ssc_assert_eq( 1, $res['total'], 'only mottiki counted' );
 	ssc_assert_eq( 'Klakksvík', $res['rows'][0]['club_name'] );
 
 	$res = SSC_Store::all( array( 'search' => 'Tórs' ) );
@@ -309,7 +309,7 @@ function ssc_test_store_status_changes(): void {
 	ssc_assert_false( SSC_Store::set_status( $id, 'bogus' ), 'invalid status rejected' );
 
 	$row = SSC_Store::find( $id );
-	ssc_assert_eq( 'processing', $row['status'] );
+	ssc_assert_eq( 'design_i_gerd', $row['status'] );
 	ssc_assert_eq( 'Bílag-nr 42', $row['note'] );
 }
 

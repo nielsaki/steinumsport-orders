@@ -14,10 +14,57 @@
 	function itemTraits(it) {
 		var R = window.sscItemRules || {};
 		var row = R[it];
-		if (row && (row.g !== undefined || row.s !== undefined || row.f !== undefined)) {
-			return { g: !!row.g, s: !!row.s, f: !!row.f };
+		var g = false;
+		var s = false;
+		var f = false;
+		var sizes = defaultSizeFallback();
+		if (row) {
+			g = !!row.g;
+			s = !!row.s;
+			f = !!row.f;
+			if (s && Array.isArray(row.sizes) && row.sizes.length) {
+				sizes = row.sizes.slice();
+			}
 		}
-		return { g: false, s: false, f: false };
+		return { g: g, s: s, f: f, sizes: sizes };
+	}
+
+	function defaultSizeFallback() {
+		var F = window.sscSizeOptionsFallback;
+		return Array.isArray(F) && F.length ? F : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+	}
+
+	function refillRowSizeSelect(row) {
+		var szSe = row.querySelector('.ssc-line-size');
+		if (!szSe || szSe.tagName !== 'SELECT') {
+			return;
+		}
+		var item = getItemValue(row);
+		var tr = itemTraits(item);
+		var list = tr.s ? tr.sizes : defaultSizeFallback();
+		var cur = szSe.value;
+		var ph0 = szSe.options[0];
+		var phText = ph0 ? ph0.textContent : '';
+		while (szSe.options.length > 0) {
+			szSe.remove(0);
+		}
+		var z = document.createElement('option');
+		z.value = '';
+		z.textContent = phText;
+		szSe.appendChild(z);
+		var idx;
+		for (idx = 0; idx < list.length; idx++) {
+			var v = list[idx];
+			var o = document.createElement('option');
+			o.value = v;
+			o.textContent = v;
+			szSe.appendChild(o);
+		}
+		if (cur && list.indexOf(cur) >= 0) {
+			szSe.value = cur;
+		} else {
+			szSe.selectedIndex = 0;
+		}
 	}
 
 	function rowsContainer() {
@@ -65,6 +112,7 @@
 
 	function applyLineMode(row) {
 		var item = getItemValue(row);
+		refillRowSizeSelect(row);
 		var g = row.querySelector('[data-ssc-line-part="trikot-gender"]') || row.querySelector('.ssc-sub-trikot-gender');
 		var sz = row.querySelector('[data-ssc-line-part="size"]') || row.querySelector('.ssc-sub-size');
 		var sp = row.querySelector('[data-ssc-line-part="bumper"]') || row.querySelector('.ssc-sub-speed');

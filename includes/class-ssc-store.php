@@ -14,14 +14,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class SSC_Store {
 
-	public const SCHEMA_VERSION = '6';
+	public const SCHEMA_VERSION = '7';
 	public const OPTION_SCHEMA  = 'ssc_db_schema_version';
 	public const TABLE          = 'ssc_submissions';
 
-	public const STATUS_RECEIVED   = 'received';
-	public const STATUS_PROCESSING = 'processing';
-	public const STATUS_DELIVERED  = 'delivered';
-	public const STATUS_CANCELLED  = 'cancelled';
+	public const STATUS_MOTTIKI         = 'mottiki';
+	public const STATUS_DESIGN_I_GERD   = 'design_i_gerd';
+	public const STATUS_BILAGT          = 'bilagt';
+	public const STATUS_FAKTURIN_SENDUR = 'fakturin_sendur';
+	public const STATUS_AVGREITT        = 'avgreitt';
+
+	/** @deprecated New defaults use slug {@see SSC_Store::STATUS_MOTTIKI} */
+	public const STATUS_RECEIVED = self::STATUS_MOTTIKI;
+
+	/** @deprecated Use {@see SSC_Store::STATUS_DESIGN_I_GERD} etc. Old DB values migrated on schema v7 */
+	public const STATUS_PROCESSING = self::STATUS_DESIGN_I_GERD;
+
+	public const STATUS_DELIVERED = self::STATUS_AVGREITT;
 
 	/**
 	 * Total pieces from stored row (new: lines_json; gomul: kvinnur+menn).
@@ -47,10 +56,11 @@ class SSC_Store {
 	/** @return array<string, string> */
 	public static function statuses(): array {
 		return array(
-			self::STATUS_RECEIVED   => 'Móttikin',
-			self::STATUS_PROCESSING => 'Í arbeiði',
-			self::STATUS_DELIVERED  => 'Avgreitt',
-			self::STATUS_CANCELLED  => 'Avlýst',
+			self::STATUS_MOTTIKI         => 'Móttiki',
+			self::STATUS_DESIGN_I_GERD   => 'Design í gerð',
+			self::STATUS_BILAGT          => 'Bílagt',
+			self::STATUS_FAKTURIN_SENDUR => 'Fakturin sendur',
+			self::STATUS_AVGREITT        => 'Avgreitt',
 		);
 	}
 
@@ -72,6 +82,10 @@ class SSC_Store {
 			return;
 		}
 
+		if ( $current !== '' && version_compare( $current, '7', '<' ) ) {
+			self::migrate_status_slug_to_v7();
+		}
+
 		global $wpdb;
 		$table   = self::table_name();
 		$charset = method_exists( $wpdb, 'get_charset_collate' ) ? $wpdb->get_charset_collate() : '';
@@ -80,7 +94,7 @@ class SSC_Store {
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
-			status VARCHAR(20) NOT NULL DEFAULT 'received',
+			status VARCHAR(20) NOT NULL DEFAULT 'mottiki',
 			club_name VARCHAR(255) NOT NULL,
 			boat_name VARCHAR(255) NOT NULL,
 			count_women INT UNSIGNED NOT NULL DEFAULT 0,
@@ -107,6 +121,26 @@ class SSC_Store {
 		dbDelta( $sql );
 
 		update_option( self::OPTION_SCHEMA, self::SCHEMA_VERSION, false );
+	}
+
+	/**
+	 * Remap legacy status slugs (v6 and earlier) to the v7 pipeline.
+	 */
+	private static function migrate_status_slug_to_v7(): void {
+		global $wpdb;
+		$table = self::table_name();
+		if ( ! self::table_exists( $table ) ) {
+			return;
+		}
+		$map = array(
+			'received'   => self::STATUS_MOTTIKI,
+			'processing' => self::STATUS_DESIGN_I_GERD,
+			'delivered'  => self::STATUS_AVGREITT,
+			'cancelled'  => self::STATUS_AVGREITT,
+		);
+		foreach ( $map as $old => $new ) {
+			$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s WHERE status = %s", $new, $old ) );
+		}
 	}
 
 	/**

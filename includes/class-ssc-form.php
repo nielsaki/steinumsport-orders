@@ -269,7 +269,10 @@ class SSC_Form {
 		$sizes   = SSC_Sanitizer::size_options();
 		$farv    = SSC_Sanitizer::farv_options();
 
-		$has_item    = ( $item !== '' && array_key_exists( $item, $items ) );
+		$has_item = ( $item !== '' && array_key_exists( $item, $items ) );
+		if ( $has_item && class_exists( 'SSC_Order_Items' ) && SSC_Sanitizer::item_needs_size( $item ) ) {
+			$sizes = SSC_Order_Items::sizes_for_item( $item );
+		}
 		$show_remove = $line_count > 1;
 		$show_g      = $has_item && SSC_Sanitizer::item_needs_gender( $item );
 		$show_sz  = $has_item && SSC_Sanitizer::item_needs_size( $item );
@@ -397,7 +400,6 @@ class SSC_Form {
 
 			<fieldset class="ssc-lines<?php echo in_array( 'order_lines', $errors, true ) ? ' ssc-field--error' : ''; ?>">
 				<legend><?php echo esc_html( $labels['order_lines'] ); ?></legend>
-				<p class="description"><?php esc_html_e( 'Fyll inn øll felt, sum tónast, eftir at tú hevur valt slag (kyn, stødd, nøgd, ynskt farv …). «Navn» undir bíleggingu er valfrítt.', 'steinum-sport-clothes' ); ?></p>
 				<div id="ssc-line-rows" class="ssc-line-rows">
 					<?php
 					$i          = 0;
@@ -488,13 +490,17 @@ class SSC_Form {
 			'ajaxUrl' => function_exists( 'admin_url' ) ? admin_url( 'admin-ajax.php' ) : '',
 			'action'  => self::AJAX_FRESH_NONCE,
 		);
-		$ajax_json  = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $ajax_cfg ) : (string) json_encode( $ajax_cfg );
-		$item_rules = class_exists( 'SSC_Order_Items' ) ? SSC_Order_Items::frontend_rules_map() : array();
-		$rules_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $item_rules ) : (string) json_encode( $item_rules );
+		$ajax_json    = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $ajax_cfg ) : (string) json_encode( $ajax_cfg );
+		$item_rules   = class_exists( 'SSC_Order_Items' ) ? SSC_Order_Items::frontend_rules_map() : array();
+		$rules_json   = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $item_rules ) : (string) json_encode( $item_rules );
+		$sizes_fb     = SSC_Sanitizer::size_options();
+		$sizes_fb_json = function_exists( 'wp_json_encode' ) ? (string) wp_json_encode( $sizes_fb ) : (string) json_encode( $sizes_fb );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
 		echo '<script>window.sscLinesL10n=' . $l10n_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from wp_json_encode( array ).
 		echo '<script>window.sscFormAjax=' . $ajax_json . ";</script>\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON from SSC_Sanitizer::size_options().
+		echo '<script>window.sscSizeOptionsFallback=' . $sizes_fb_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON built from SSC_Order_Items catalog.
 		echo '<script>window.sscItemRules=' . $rules_json . ";</script>\n";
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static asset from disk, not user input.

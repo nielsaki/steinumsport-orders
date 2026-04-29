@@ -22,7 +22,7 @@ class SSC_Settings {
 	public static function defaults(): array {
 		return array(
 			'admin_to'        => (string) get_option( 'admin_email', '' ),
-			'admin_subject'   => 'Nýggj tilkunn frá {site} – {club}',
+			'admin_subject'   => 'Nýggj tilkunn – {club}',
 			'receipt_subject' => 'Tín tilkunn er móttikin – {site}',
 			'receipt_intro'   => 'Halló og takk fyri tína tilkunn. Vit hava móttikin uppskotið og fylgja tær yvir lutirnar.',
 			'from_name'       => '',
@@ -101,7 +101,7 @@ class SSC_Settings {
 						<th><label for="ssc_admin_subject"><?php esc_html_e( 'Admin yvirskrift', 'steinum-sport-clothes' ); ?></label></th>
 						<td>
 							<input type="text" id="ssc_admin_subject" name="<?php echo esc_attr( self::OPTION ); ?>[admin_subject]" value="<?php echo esc_attr( $opts['admin_subject'] ); ?>" class="regular-text" />
-							<p class="description"><?php esc_html_e( 'Til ráðis: {site}, {club}, {boat}.', 'steinum-sport-clothes' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Til ráðis: {club}, {boat}.', 'steinum-sport-clothes' ); ?></p>
 						</td>
 					</tr>
 					<tr>
