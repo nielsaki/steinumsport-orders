@@ -18,7 +18,6 @@ class SSC_Admin_Order_Items {
 
 	public function register(): void {
 		add_action( 'admin_post_ssc_save_order_items', array( $this, 'handle_save' ) );
-		add_action( 'admin_post_ssc_reset_order_items', array( $this, 'handle_reset' ) );
 	}
 
 	public function render_page(): void {
@@ -69,11 +68,6 @@ class SSC_Admin_Order_Items {
 				<?php submit_button( __( 'Goym', 'steinum-sport-clothes' ) ); ?>
 			</form>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:1.5em;" onsubmit="return confirm('<?php echo esc_js( __( 'Endurseta til sjálvvirkt grundgevið?', 'steinum-sport-clothes' ) ); ?>');">
-				<?php wp_nonce_field( 'ssc_reset_order_items' ); ?>
-				<input type="hidden" name="action" value="ssc_reset_order_items" />
-				<?php submit_button( __( 'Endurset grundgevið', 'steinum-sport-clothes' ), 'secondary' ); ?>
-			</form>
 			<script>
 			(function () {
 				var btn = document.getElementById('ssc-order-items-add-row');
@@ -228,25 +222,6 @@ class SSC_Admin_Order_Items {
 				array(
 					'page'            => self::PAGE,
 					'ssc_items_saved' => $ok ? '1' : '0',
-				),
-				admin_url( 'admin.php' )
-			)
-		);
-		exit;
-	}
-
-	public function handle_reset(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Ikki loyvi.', 'steinum-sport-clothes' ), '', array( 'response' => 403 ) );
-		}
-		check_admin_referer( 'ssc_reset_order_items' );
-
-		$deleted = delete_option( SSC_Order_Items::OPTION );
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'            => self::PAGE,
-					'ssc_items_saved' => $deleted !== false ? '1' : '0',
 				),
 				admin_url( 'admin.php' )
 			)
