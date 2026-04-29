@@ -18,7 +18,7 @@ class SSC_Submission {
 	 * Process an already-sanitized submission.
 	 *
 	 * @param array<string, string|int> $data Sanitized form data.
-	 * @param string|null               $override_admin_to Optional recipient for admin tilkunn (e.g. royndar-tilkunn).
+	 * @param string|null               $override_admin_to Optional recipient for admin tilkunn (e.g. royndar koyring).
 	 * @return bool True if at least the admin email was queued / dry-run accepted.
 	 */
 	public function handle( array $data, ?string $override_admin_to = null ): bool {

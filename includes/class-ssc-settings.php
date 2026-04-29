@@ -85,8 +85,8 @@ class SSC_Settings {
 			<?php if ( isset( $_GET['ssc_tested'] ) ) : ?>
 				<div class="notice notice-<?php echo '1' === $_GET['ssc_tested'] ? 'success' : 'error'; ?> is-dismissible">
 					<p><?php echo '1' === $_GET['ssc_tested']
-						? esc_html__( 'Royndar-tilkunn varð send.', 'steinum-sport-clothes' )
-						: esc_html__( 'Royndar-tilkunn miseydnaðist.', 'steinum-sport-clothes' ); ?></p>
+						? esc_html__( 'Royndar koyring varð send.', 'steinum-sport-clothes' )
+						: esc_html__( 'Royndar koyring miseydnaðist.', 'steinum-sport-clothes' ); ?></p>
 				</div>
 			<?php endif; ?>
 
@@ -132,7 +132,7 @@ class SSC_Settings {
 			</form>
 
 			<hr />
-			<h2><?php esc_html_e( 'Royndar-tilkunn', 'steinum-sport-clothes' ); ?></h2>
+			<h2><?php esc_html_e( 'Royndar koyring', 'steinum-sport-clothes' ); ?></h2>
 			<p><?php esc_html_e( 'Send eina tilkunn við royndarinnihaldi til at vita um teldupostur, PDF og DB-goymsla virka.', 'steinum-sport-clothes' ); ?></p>
 			<p class="description"><?php esc_html_e( 'Trýst teldupostir inn. Um eitt felt er tómt, verður sjálvvirkið brúkt »Admin teldupostur« (móttakari) og »teldupostur hjá síðarhaldara« (sendur og gjalding).', 'steinum-sport-clothes' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="ssc-test-tilkunn-form">
@@ -161,7 +161,7 @@ class SSC_Settings {
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Send royndar-tilkunn', 'steinum-sport-clothes' ), 'secondary', 'submit', false ); ?>
+				<?php submit_button( __( 'Send royndar koyring', 'steinum-sport-clothes' ), 'secondary', 'submit', false ); ?>
 			</form>
 		</div>
 		<?php

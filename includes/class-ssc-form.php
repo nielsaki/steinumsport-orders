@@ -61,7 +61,7 @@ class SSC_Form {
 	}
 
 	/**
-	 * Sample submission for admin "Send royndar-tilkunn" and tests.
+	 * Sample submission for admin "Send royndar koyring" and tests.
 	 *
 	 * @param string $billing_email Legacy: used when `$email_overrides` has no `billing_email`.
 	 * @param array<string, string> $email_overrides Optional `contact_email`, `billing_email` (valid addresses only).
