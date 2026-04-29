@@ -81,7 +81,6 @@ function ssc_preview_demo_input(): array {
 	);
 	$sizes   = SSC_Sanitizer::size_options();
 	$genders = array( SSC_Sanitizer::GENDER_MEN, SSC_Sanitizer::GENDER_WOMEN );
-	$farv    = array_keys( SSC_Sanitizer::farv_options() );
 	$n_lines = random_int( 1, 5 );
 	$lines   = array();
 	for ( $i = 0; $i < $n_lines; $i++ ) {
@@ -100,8 +99,13 @@ function ssc_preview_demo_input(): array {
 		if ( SSC_Sanitizer::item_needs_size( $item ) && $sizes ) {
 			$line['size'] = $sizes[ random_int( 0, count( $sizes ) - 1 ) ];
 		}
-		if ( SSC_Sanitizer::item_uses_farv( $item ) && $farv ) {
-			$line['bumper_color'] = $farv[ random_int( 0, count( $farv ) - 1 ) ];
+		if ( SSC_Sanitizer::item_uses_farv( $item ) ) {
+			$slugs = class_exists( 'SSC_Order_Items' )
+				? SSC_Order_Items::farv_slugs_for_item( $item )
+				: array_keys( SSC_Sanitizer::farv_options() );
+			if ( array() !== $slugs ) {
+				$line['bumper_color'] = $slugs[ random_int( 0, count( $slugs ) - 1 ) ];
+			}
 		}
 		$lines[] = $line;
 	}

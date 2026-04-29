@@ -200,7 +200,6 @@ class SSC_Admin_Submissions {
 												echo '<thead><tr><th>#</th><th>Slag</th><th>Kyn</th><th>Stødd</th><th>Farva</th><th>Nøgd</th><th>Navn</th></tr></thead><tbody>';
 												$it = SSC_Sanitizer::item_types();
 												$gl = SSC_Sanitizer::gender_labels();
-												$fa = SSC_Sanitizer::farv_options();
 												$i  = 0;
 												foreach ( $lines as $ln ) {
 													if ( ! is_array( $ln ) ) {
@@ -220,7 +219,14 @@ class SSC_Admin_Submissions {
 													$bum_raw = (string) ( $ln['bumper_color'] ?? '' );
 													$bum     = '';
 													if ( SSC_Sanitizer::item_uses_farv( $ii ) ) {
-														$bum = $fa[ $bum_raw ] ?? $bum_raw;
+														$lbl = class_exists( 'SSC_Order_Items' )
+															? SSC_Order_Items::farv_label_for_slug( $ii, $bum_raw )
+															: '';
+														if ( '' === $lbl && '' !== $bum_raw ) {
+															$fa = SSC_Sanitizer::farv_options();
+															$lbl = $fa[ $bum_raw ] ?? $bum_raw;
+														}
+														$bum = $lbl;
 													}
 													printf(
 														'<tr><td>%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%s</td></tr>',

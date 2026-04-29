@@ -26,12 +26,50 @@
 				sizes = row.sizes.slice();
 			}
 		}
-		return { g: g, s: s, f: f, sizes: sizes };
+		var farvMap = {};
+		if (row && row.farv && typeof row.farv === 'object') {
+			farvMap = row.farv;
+		}
+		return { g: g, s: s, f: f, sizes: sizes, farv: farvMap };
 	}
 
 	function defaultSizeFallback() {
 		var F = window.sscSizeOptionsFallback;
-		return Array.isArray(F) && F.length ? F : ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+		return Array.isArray(F) && F.length ? F : ['2XS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+	}
+
+	function refillBumpSelect(row) {
+		var bSel = row.querySelector('select.ssc-line-bump');
+		if (!bSel || bSel.tagName !== 'SELECT') {
+			return;
+		}
+		var item = getItemValue(row);
+		var tr = itemTraits(item);
+		var farvMap = tr.farv && typeof tr.farv === 'object' ? tr.farv : {};
+		var keys = Object.keys(farvMap);
+		var cur = bSel.value;
+		var ph0 = bSel.options[0];
+		var phText = ph0 ? ph0.textContent : '';
+		while (bSel.options.length > 0) {
+			bSel.remove(0);
+		}
+		var z = document.createElement('option');
+		z.value = '';
+		z.textContent = phText;
+		bSel.appendChild(z);
+		var ki;
+		for (ki = 0; ki < keys.length; ki++) {
+			var slug = keys[ki];
+			var ox = document.createElement('option');
+			ox.value = slug;
+			ox.textContent = farvMap[slug];
+			bSel.appendChild(ox);
+		}
+		if (cur && keys.indexOf(cur) >= 0) {
+			bSel.value = cur;
+		} else {
+			bSel.selectedIndex = 0;
+		}
 	}
 
 	function refillRowSizeSelect(row) {
@@ -113,6 +151,7 @@
 	function applyLineMode(row) {
 		var item = getItemValue(row);
 		refillRowSizeSelect(row);
+		refillBumpSelect(row);
 		var g = row.querySelector('[data-ssc-line-part="trikot-gender"]') || row.querySelector('.ssc-sub-trikot-gender');
 		var sz = row.querySelector('[data-ssc-line-part="size"]') || row.querySelector('.ssc-sub-size');
 		var sp = row.querySelector('[data-ssc-line-part="bumper"]') || row.querySelector('.ssc-sub-speed');

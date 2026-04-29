@@ -57,7 +57,7 @@ class SSC_Sanitizer {
 
 	/** @return list<string> */
 	public static function size_options(): array {
-		return array( 'XS', 'S', 'M', 'L', 'XL', 'XXL' );
+		return array( '2XS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL' );
 	}
 
 	/**
@@ -163,8 +163,10 @@ class SSC_Sanitizer {
 			$gender       = self::text( $row['gender'] ?? '' );
 			$bumper_color = self::text( $row['bumper_color'] ?? '' );
 			if ( self::item_uses_farv( $item ) ) {
-				$valid_farvar = array_keys( self::farv_options() );
-				$bumper_color   = in_array( $bumper_color, $valid_farvar, true ) ? $bumper_color : '';
+				$valid_farvar = class_exists( 'SSC_Order_Items' )
+					? SSC_Order_Items::farv_slugs_for_item( $item )
+					: array_keys( self::farv_options() );
+				$bumper_color = in_array( $bumper_color, $valid_farvar, true ) ? $bumper_color : '';
 			}
 
 			if ( ! in_array( $gender, array( self::GENDER_WOMEN, self::GENDER_MEN ), true ) ) {
@@ -246,6 +248,10 @@ class SSC_Sanitizer {
 			return false;
 		}
 		if ( self::item_uses_farv( $item ) ) {
+			if ( class_exists( 'SSC_Order_Items' ) ) {
+				$slugs = SSC_Order_Items::farv_slugs_for_item( $item );
+				return in_array( $bumper, $slugs, true );
+			}
 			return in_array( $bumper, array_keys( self::farv_options() ), true );
 		}
 		$allowed_sizes = self::size_options();
@@ -269,7 +275,7 @@ class SSC_Sanitizer {
 		$glabel = self::gender_labels();
 		$out    = array();
 		$n      = 0;
-		$flarv = self::farv_options();
+		$flarv = class_exists( 'SSC_Order_Items' ) ? null : self::farv_options();
 		foreach ( $lines as $row ) {
 			$n++;
 			$item  = (string) ( $row['item'] ?? self::ITEM_TSHIRT );
@@ -282,7 +288,16 @@ class SSC_Sanitizer {
 			$name  = trim( (string) ( $row['name'] ?? '' ) );
 			$gen   = (string) ( $row['gender'] ?? '' );
 			$bum   = (string) ( $row['bumper_color'] ?? '' );
-			$bumlab = isset( $flarv[ $bum ] ) ? $flarv[ $bum ] : $bum;
+			if ( null === $flarv ) {
+				$bumlab = SSC_Order_Items::farv_label_for_slug( $item, $bum );
+				if ( '' === $bumlab && '' !== $bum ) {
+					$legacy = self::farv_options();
+					$x      = $legacy[ $bum ] ?? '';
+					$bumlab = '' !== $x ? (string) $x : $bum;
+				}
+			} else {
+				$bumlab = $flarv[ $bum ] ?? $bum;
+			}
 
 			$parts = array( "{$n}. {$ilab}" );
 			if ( self::item_needs_gender( $item ) && isset( $glabel[ $gen ] ) ) {
@@ -312,9 +327,9 @@ class SSC_Sanitizer {
 	public static function order_lines_pdf_table_rows( array $lines ): array {
 		$types  = self::item_types();
 		$glabel = self::gender_labels();
-		$flarv  = self::farv_options();
 		$out    = array();
 		$n      = 0;
+		$fallback_farvs = function_exists( 'apply_filters' ) ? self::farv_options() : array();
 		foreach ( $lines as $row ) {
 			if ( ! is_array( $row ) || self::is_blank_line( $row ) ) {
 				continue;
@@ -340,7 +355,12 @@ class SSC_Sanitizer {
 			$farv = '—';
 			$bum  = (string) ( $row['bumper_color'] ?? '' );
 			if ( self::item_uses_farv( $item ) ) {
-				$farv = isset( $flarv[ $bum ] ) ? $flarv[ $bum ] : ( '' !== $bum ? $bum : '—' );
+				if ( class_exists( 'SSC_Order_Items' ) ) {
+					$lbl = SSC_Order_Items::farv_label_for_slug( $item, $bum );
+					$farv = '' !== $lbl ? $lbl : ( '' !== $bum ? ( $fallback_farvs[ $bum ] ?? $bum ) : '—' );
+				} else {
+					$farv = $fallback_farvs[ $bum ] ?? ( '' !== $bum ? $bum : '—' );
+				}
 			}
 			$qty  = max( 1, (int) ( $row['qty'] ?? 0 ) );
 			$name = trim( (string) ( $row['name'] ?? '' ) );

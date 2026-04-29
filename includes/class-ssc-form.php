@@ -266,12 +266,18 @@ class SSC_Form {
 		$bum   = (string) ( $line['bumper_color'] ?? '' );
 		$items = SSC_Sanitizer::item_types();
 		$glabels = SSC_Sanitizer::gender_labels();
-		$sizes   = SSC_Sanitizer::size_options();
-		$farv    = SSC_Sanitizer::farv_options();
+		$sizes = SSC_Sanitizer::size_options();
+		$farv  = SSC_Sanitizer::farv_options();
 
 		$has_item = ( $item !== '' && array_key_exists( $item, $items ) );
 		if ( $has_item && class_exists( 'SSC_Order_Items' ) && SSC_Sanitizer::item_needs_size( $item ) ) {
 			$sizes = SSC_Order_Items::sizes_for_item( $item );
+		}
+		if ( $has_item && class_exists( 'SSC_Order_Items' ) && SSC_Sanitizer::item_uses_farv( $item ) ) {
+			$fmap = SSC_Order_Items::farv_map_for_item( $item );
+			if ( array() !== $fmap ) {
+				$farv = $fmap;
+			}
 		}
 		$show_remove = $line_count > 1;
 		$show_g      = $has_item && SSC_Sanitizer::item_needs_gender( $item );

@@ -86,12 +86,20 @@ class SSC_Admin_Order_Items {
 				if (form) {
 					form.addEventListener('change', function (ev) {
 						var t = ev.target;
-						if (!t || !t.classList || !t.classList.contains('ssc-admin-needs-size')) {
+						if (!t || !t.classList) {
 							return;
 						}
-						var pal = t.closest('td').querySelector('.ssc-admin-size-palette');
-						if (pal) {
-							pal.style.display = t.checked ? '' : 'none';
+						if (t.classList.contains('ssc-admin-needs-size')) {
+							var pal = t.closest('td').querySelector('.ssc-admin-size-palette');
+							if (pal) {
+								pal.style.display = t.checked ? '' : 'none';
+							}
+						}
+						if (t.classList.contains('ssc-admin-needs-farv')) {
+							var fal = t.closest('td').querySelector('.ssc-admin-farv-palette');
+							if (fal) {
+								fal.style.display = t.checked ? '' : 'none';
+							}
 						}
 					});
 				}
@@ -109,6 +117,8 @@ class SSC_Admin_Order_Items {
 						inp[k].name = nm;
 						if (nm.indexOf('[stable_id]') > -1) {
 							inp[k].value = '';
+						} else if (inp[k].tagName === 'TEXTAREA') {
+							inp[k].value = '';
 						} else if (inp[k].type === 'text') {
 							inp[k].value = '';
 						} else if (inp[k].type === 'checkbox') {
@@ -119,6 +129,10 @@ class SSC_Admin_Order_Items {
 					if (pal) {
 						pal.style.display = 'none';
 					}
+					var fpal = clone.querySelector('.ssc-admin-farv-palette');
+					if (fpal) {
+						fpal.style.display = 'none';
+					}
 					tbody.appendChild(clone);
 				});
 			})();
@@ -128,7 +142,7 @@ class SSC_Admin_Order_Items {
 	}
 
 	/**
-	 * @param array{id?: string, label?: string, needs_gender?: bool, needs_size?: bool, sizes?: list<string>|mixed, uses_farv?: bool} $row
+	 * @param array{id?: string, label?: string, needs_gender?: bool, needs_size?: bool, sizes?: list<string>|mixed, uses_farv?: bool, farvs?: list<array{slug:string,label:string}|mixed>} $row
 	 */
 	private static function render_row_inputs( int $i, array $row ): void {
 		$id   = (string) ( $row['id'] ?? '' );
@@ -139,6 +153,21 @@ class SSC_Admin_Order_Items {
 
 		$size_master = SSC_Sanitizer::size_options();
 		$picked_sizes = $s ? SSC_Order_Items::sizes_allowed_from_row( $row ) : array();
+		$farv_txt       = '';
+		$farv_lines_arr = array();
+		if ( ! empty( $row['farvs'] ) && is_array( $row['farvs'] ) ) {
+			foreach ( $row['farvs'] as $fp ) {
+				if ( ! is_array( $fp ) ) {
+					continue;
+				}
+				if ( isset( $fp['label'] ) && '' !== trim( (string) $fp['label'] ) ) {
+					$farv_lines_arr[] = (string) $fp['label'];
+				}
+			}
+		}
+		if ( array() !== $farv_lines_arr ) {
+			$farv_txt = implode( "\n", $farv_lines_arr );
+		}
 
 		?>
 		<tr class="ssc-order-item-row">
@@ -170,8 +199,15 @@ class SSC_Admin_Order_Items {
 			</td>
 			<td>
 				<label>
-					<input type="checkbox" name="ssc_items[<?php echo (int) $i; ?>][uses_farv]" value="1" <?php checked( $f ); ?> />
+					<input type="checkbox" class="ssc-admin-needs-farv" name="ssc_items[<?php echo (int) $i; ?>][uses_farv]" value="1" <?php checked( $f ); ?> />
 				</label>
+				<div class="ssc-admin-farv-palette" style="<?php echo $f ? '' : 'display:none;'; ?>">
+					<fieldset style="margin:0.65rem 0 0;padding:0.5rem;border:1px solid #c3c4c7;border-radius:4px;">
+						<legend style="padding:0 0.25rem;font-size:11px;"><?php esc_html_e( 'Giltugar farvu', 'steinum-sport-clothes' ); ?></legend>
+						<textarea name="ssc_items[<?php echo (int) $i; ?>][farv_lines]" rows="5" cols="36" class="large-text" style="max-width:100%;"><?php echo esc_textarea( $farv_txt ); ?></textarea>
+						<p class="description" style="margin:0.35rem 0 0;"><?php esc_html_e( 'Ein farva á hvørja línu. Tóm røð = sjálvvirkt grundgevið fyri tá slagnum.', 'steinum-sport-clothes' ); ?></p>
+					</fieldset>
+				</div>
 			</td>
 		</tr>
 		<?php
